@@ -1,0 +1,25 @@
+﻿@page
+@model ProyectoPlanilla.Pages.Empleados.IndexModel
+
+<h2>Lista de Empleados</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Documento</th>
+            <th>Puesto</th>
+            <th>Salario/Hora</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Empleados) {
+            <tr>
+                <td>@item.Nombre</td>
+                <td>@item.ValorDocumentoIdentidad</td>
+                <td>@item.Puesto.Nombre</td>
+                <td>@item.Puesto.SalarioXHora.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>

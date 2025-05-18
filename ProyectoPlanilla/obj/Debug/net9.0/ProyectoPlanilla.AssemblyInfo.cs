@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ProyectoPlanilla")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+29bf658637b8a225010ec037a8e539c76b23520f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2f78a8f22b42f4a746cb09282c8676eae699a330")]
 [assembly: System.Reflection.AssemblyProductAttribute("ProyectoPlanilla")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ProyectoPlanilla")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
