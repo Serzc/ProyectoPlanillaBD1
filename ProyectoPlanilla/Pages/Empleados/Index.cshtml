@@ -3,6 +3,13 @@
 
 <h2>Lista de Empleados</h2>
 
+@if (!string.IsNullOrEmpty(Model.MensajeError))
+{
+    <div class="alert alert-danger">
+        @Model.MensajeError
+    </div>
+}
+
 <table class="table">
     <thead>
         <tr>
