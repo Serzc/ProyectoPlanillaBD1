@@ -18,7 +18,7 @@ namespace ProyectoPlanilla.Pages.Empleados
 
         public async Task OnGetAsync()
         {
-            var (empleados, resultado, mensaje) = await _context.ObtenerEmpleadosActivos();
+            var (empleados, resultado) = await _context.ObtenerEmpleadosActivos();
 
             if (resultado == 0)
             {
@@ -26,7 +26,7 @@ namespace ProyectoPlanilla.Pages.Empleados
             }
             else
             {
-                MensajeError = mensaje;
+                MensajeError = "Error al obtener los empleados activos. Código de error: " + resultado;
                 // Aquí podrías loguear el error o manejarlo de otra manera
             }
         }

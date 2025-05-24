@@ -7,11 +7,10 @@ namespace ProyectoPlanilla.Data
 {
     public partial class ApplicationDbContext
     {
-        public async Task<(List<Empleado>, int, string)> ObtenerEmpleadosActivos()
+        public async Task<(List<Empleado>, int)> ObtenerEmpleadosActivos()
         {
             var empleados = new List<Empleado>();
             int resultado = 0;
-            string mensaje = string.Empty;
 
             try
             {
@@ -27,18 +26,9 @@ namespace ProyectoPlanilla.Data
                         SqlDbType = SqlDbType.Int,
                         Direction = ParameterDirection.Output
                     };
-
-                    var outMensaje = new SqlParameter
-                    {
-                        ParameterName = "@outMensaje",
-                        SqlDbType = SqlDbType.VarChar,
-                        Size = 500,
-                        Direction = ParameterDirection.Output
-                    };
-
+                   
                     command.Parameters.Add(outResultado);
-                    command.Parameters.Add(outMensaje);
-
+                    
                     await Database.OpenConnectionAsync();
 
                     using (var reader = await command.ExecuteReaderAsync())
@@ -62,17 +52,15 @@ namespace ProyectoPlanilla.Data
                         }
                     }
 
-                    resultado = (int)outResultado.Value;
-                    mensaje = outMensaje.Value?.ToString() ?? string.Empty;
+                    resultado = (int)outResultado.Value;                    
                 }
             }
             catch (Exception ex)
             {
                 resultado = 50000;
-                mensaje = $"Error al ejecutar el procedimiento: {ex.Message}";
-            }
+                            }
 
-            return (empleados, resultado, mensaje);
+            return (empleados, resultado);
         }
 
 
