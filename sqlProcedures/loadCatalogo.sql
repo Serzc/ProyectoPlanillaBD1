@@ -219,22 +219,22 @@ BEGIN TRY
 	';
 
     -- 1. Cargar Tipos de Documento de Identidad
-    INSERT INTO TipoDocumentoIdentidad (Id, Nombre)
+    INSERT INTO TipoDocumentoIdentidad (id, Nombre)
     SELECT 
         doc.value('@Id', 'INT'),
         doc.value('@Nombre', 'VARCHAR(50)')
     FROM @xmlData.nodes('/Catalogo/TiposdeDocumentodeIdentidad/TipoDocuIdentidad') AS T(doc)
-    WHERE NOT EXISTS (SELECT 1 FROM TipoDocumentoIdentidad WHERE Id = doc.value('@Id', 'INT'));
+    WHERE NOT EXISTS (SELECT 1 FROM TipoDocumentoIdentidad WHERE id = doc.value('@Id', 'INT'));
 
     -- 2. Cargar Tipos de Jornada
-    INSERT INTO TipoJornada (Id, Nombre, HoraInicio, HoraFin)
+    INSERT INTO TipoJornada (id, Nombre, HoraInicio, HoraFin)
     SELECT 
         jornada.value('@Id', 'INT'),
         jornada.value('@Nombre', 'VARCHAR(50)'),
         CAST(jornada.value('@HoraInicio', 'VARCHAR(8)') AS TIME),
         CAST(jornada.value('@HoraFin', 'VARCHAR(8)') AS TIME)
     FROM @xmlData.nodes('/Catalogo/TiposDeJornada/TipoDeJornada') AS T(jornada)
-    WHERE NOT EXISTS (SELECT 1 FROM TipoJornada WHERE Id = jornada.value('@Id', 'INT'));
+    WHERE NOT EXISTS (SELECT 1 FROM TipoJornada WHERE id = jornada.value('@Id', 'INT'));
 
     -- 3. Cargar Puestos
     INSERT INTO Puesto (Nombre, SalarioXHora)
@@ -245,15 +245,15 @@ BEGIN TRY
     WHERE NOT EXISTS (SELECT 1 FROM Puesto WHERE Nombre = puesto.value('@Nombre', 'VARCHAR(100)'));
 
     -- 4. Cargar Departamentos
-    INSERT INTO Departamento (Id, Nombre)
+    INSERT INTO Departamento (id, Nombre)
     SELECT 
         depto.value('@Id', 'INT'),
         depto.value('@Nombre', 'VARCHAR(100)')
     FROM @xmlData.nodes('/Catalogo/Departamentos/Departamento') AS T(depto)
-    WHERE NOT EXISTS (SELECT 1 FROM Departamento WHERE Id = depto.value('@Id', 'INT'));
+    WHERE NOT EXISTS (SELECT 1 FROM Departamento WHERE id = depto.value('@Id', 'INT'));
 
     -- 5. Cargar Feriados
-    INSERT INTO Feriado (Id, Nombre, Fecha)
+    INSERT INTO Feriado (id, Nombre, Fecha)
     SELECT 
         feriado.value('@Id', 'INT'),
         feriado.value('@Nombre', 'VARCHAR(100)'),
@@ -263,18 +263,18 @@ BEGIN TRY
             ELSE NULL
         END
     FROM @xmlData.nodes('/Catalogo/Feriados/Feriado') AS T(feriado)
-    WHERE NOT EXISTS (SELECT 1 FROM Feriado WHERE Id = feriado.value('@Id', 'INT'));
+    WHERE NOT EXISTS (SELECT 1 FROM Feriado WHERE id = feriado.value('@Id', 'INT'));
 
     -- 6. Cargar Tipos de Movimiento
-    INSERT INTO TipoMovimiento (Id, Nombre)
+    INSERT INTO TipoMovimiento (id, Nombre)
     SELECT 
         mov.value('@Id', 'INT'),
         mov.value('@Nombre', 'VARCHAR(100)')
     FROM @xmlData.nodes('/Catalogo/TiposDeMovimiento/TipoDeMovimiento') AS T(mov)
-    WHERE NOT EXISTS (SELECT 1 FROM TipoMovimiento WHERE Id = mov.value('@Id', 'INT'));
+    WHERE NOT EXISTS (SELECT 1 FROM TipoMovimiento WHERE id = mov.value('@Id', 'INT'));
 
     -- 7. Cargar Tipos de Deducción
-    INSERT INTO TipoDeduccion (Id, Nombre, Obligatorio, Porcentual, Valor)
+    INSERT INTO TipoDeduccion (id, Nombre, Obligatorio, Porcentual, Valor)
     SELECT 
         ded.value('@Id', 'INT'),
         ded.value('@Nombre', 'VARCHAR(100)'),
@@ -282,18 +282,18 @@ BEGIN TRY
         CASE WHEN ded.value('@Porcentual', 'VARCHAR(2)') = 'Si' THEN 1 ELSE 0 END,
         ded.value('@Valor', 'DECIMAL(10,2)')
     FROM @xmlData.nodes('/Catalogo/TiposDeDeduccion/TipoDeDeduccion') AS T(ded)
-    WHERE NOT EXISTS (SELECT 1 FROM TipoDeduccion WHERE Id = ded.value('@Id', 'INT'));
+    WHERE NOT EXISTS (SELECT 1 FROM TipoDeduccion WHERE id = ded.value('@Id', 'INT'));
 
     -- 8. Cargar Tipos de Evento
-    INSERT INTO TipoEvento (Id, Nombre)
+    INSERT INTO TipoEvento (id, Nombre)
     SELECT 
         evento.value('@Id', 'INT'),
         evento.value('@Nombre', 'VARCHAR(100)')
     FROM @xmlData.nodes('/Catalogo/TiposdeEvento/TipoEvento') AS T(evento)
-    WHERE NOT EXISTS (SELECT 1 FROM TipoEvento WHERE Id = evento.value('@Id', 'INT'));
+    WHERE NOT EXISTS (SELECT 1 FROM TipoEvento WHERE id = evento.value('@Id', 'INT'));
 
     -- 9. Cargar Usuarios
-    INSERT INTO Usuario (Username, Password, Tipo, EmpleadoId)
+    INSERT INTO Usuario (Username, Password, Tipo, idEmpleado)
     SELECT 
         usuario.value('@Username', 'VARCHAR(50)'),
         usuario.value('@Password', 'VARCHAR(100)'),
@@ -304,21 +304,21 @@ BEGIN TRY
 
     -- 10. Cargar Empleados (versión corregida)
     DECLARE @EmpleadosTemp TABLE (
-        IdUsuario INT,
+        idUsuario INT,
         Nombre VARCHAR(100),
-        TipoDocumentoId INT,
+        idTipoDocumento INT,
         ValorDocumentoIdentidad VARCHAR(50),
         FechaNacimiento DATE,
         FechaContratacion DATE,
-        DepartamentoId INT,
+        idDepartamento INT,
         NombrePuesto VARCHAR(100),
         Activo BIT
     );
 
-    -- Extraer datos de empleados a tabla temporal (CORRECCIÓN DEL ERROR)
+    -- Extraer datos de empleados a tabla temporal
     INSERT INTO @EmpleadosTemp
     SELECT 
-        emp.value('@IdUsuario', 'INT'),  -- Corregido: usando directamente el valor del XML
+        emp.value('@IdUsuario', 'INT'),
         emp.value('@Nombre', 'VARCHAR(100)'),
         emp.value('@IdTipoDocumento', 'INT'),
         emp.value('@ValorDocumento', 'VARCHAR(50)'),
@@ -335,18 +335,18 @@ BEGIN TRY
 
     -- Insertar empleados con los puestos correctos
     INSERT INTO Empleado (
-        Nombre, TipoDocumentoId, ValorDocumentoIdentidad, 
-        FechaNacimiento, FechaContratacion, PuestoId, 
-        DepartamentoId, Activo
+        Nombre, idTipoDocumento, ValorDocumentoIdentidad, 
+        FechaNacimiento, FechaContratacion, idPuesto, 
+        idDepartamento, Activo
     )
     SELECT 
         t.Nombre,
-        t.TipoDocumentoId,
+        t.idTipoDocumento,
         t.ValorDocumentoIdentidad,
         t.FechaNacimiento,
         t.FechaContratacion,
-        p.Id,
-        t.DepartamentoId,
+        p.id,
+        t.idDepartamento,
         t.Activo
     FROM @EmpleadosTemp t
     INNER JOIN Puesto p ON p.Nombre = t.NombrePuesto
@@ -355,19 +355,19 @@ BEGIN TRY
         WHERE ValorDocumentoIdentidad = t.ValorDocumentoIdentidad
     );
 
-    -- Actualizar usuarios con los IDs de empleado (versión corregida)
+    -- Actualizar usuarios con los IDs de empleado
     UPDATE u
-    SET u.EmpleadoId = e.Id
+    SET u.idEmpleado = e.id
     FROM Usuario u
-    INNER JOIN @EmpleadosTemp t ON u.Id = t.IdUsuario
+    INNER JOIN @EmpleadosTemp t ON u.id = t.idUsuario
     INNER JOIN Empleado e ON e.ValorDocumentoIdentidad = t.ValorDocumentoIdentidad
-    WHERE u.EmpleadoId IS NULL;
+    WHERE u.idEmpleado IS NULL;
 
     -- Asignar deducciones obligatorias a los nuevos empleados
-    INSERT INTO EmpleadoDeduccion (EmpleadoId, TipoDeduccionId, ValorPorcentual, ValorFijo)
+    INSERT INTO EmpleadoDeduccion (idEmpleado, idTipoDeduccion, ValorPorcentual, ValorFijo)
     SELECT 
-        e.Id,
-        td.Id,
+        e.id,
+        td.id,
         CASE WHEN td.Porcentual = 1 THEN td.Valor ELSE NULL END,
         CASE WHEN td.Porcentual = 0 THEN td.Valor ELSE NULL END
     FROM Empleado e
@@ -375,10 +375,10 @@ BEGIN TRY
     WHERE td.Obligatorio = 1
     AND NOT EXISTS (
         SELECT 1 FROM EmpleadoDeduccion ed 
-        WHERE ed.EmpleadoId = e.Id AND ed.TipoDeduccionId = td.Id
+        WHERE ed.idEmpleado = e.id AND ed.idTipoDeduccion = td.id
     )
-    AND e.Id IN (
-        SELECT e2.Id FROM Empleado e2
+    AND e.id IN (
+        SELECT e2.id FROM Empleado e2
         INNER JOIN @EmpleadosTemp t ON e2.ValorDocumentoIdentidad = t.ValorDocumentoIdentidad
     );
 

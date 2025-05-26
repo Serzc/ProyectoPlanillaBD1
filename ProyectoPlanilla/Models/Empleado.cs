@@ -4,7 +4,7 @@ namespace ProyectoPlanilla.Models
 {
     public class Empleado
     {
-        public int Id { get; set; }
+        public int id { get; set; }
 
         [Required]
         public string Nombre { get; set; }
@@ -12,8 +12,10 @@ namespace ProyectoPlanilla.Models
         [Required]
         public string ValorDocumentoIdentidad { get; set; }
 
-        public int PuestoId { get; set; }
-        public Puesto Puesto { get; set; }
+        public int idPuesto { get; set; }
+        public string Puesto { get; set; }
+        
+    
 
         public bool Activo { get; set; } = true;
     }

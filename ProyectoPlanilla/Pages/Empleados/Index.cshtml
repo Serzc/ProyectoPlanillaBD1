@@ -1,13 +1,16 @@
 ﻿@page
 @model ProyectoPlanilla.Pages.Empleados.IndexModel
 
-<h2>Lista de Empleados</h2>
+<h2>Empleados</h2>
+
+<form method="get">
+    <input type="text" name="Filtro" value="@Model.Filtro" placeholder="Buscar por nombre o documento..." />
+    <button type="submit">Buscar</button>
+</form>
 
 @if (!string.IsNullOrEmpty(Model.MensajeError))
 {
-    <div class="alert alert-danger">
-        @Model.MensajeError
-    </div>
+    <div class="alert alert-danger">@Model.MensajeError</div>
 }
 
 <table class="table">
@@ -16,17 +19,18 @@
             <th>Nombre</th>
             <th>Documento</th>
             <th>Puesto</th>
-            <th>Salario/Hora</th>
+           
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model.Empleados) {
-            <tr>
-                <td>@item.Nombre</td>
-                <td>@item.ValorDocumentoIdentidad</td>
-                <td>@item.Puesto.Nombre</td>
-                <td>@item.Puesto.SalarioXHora.ToString("C")</td>
-            </tr>
-        }
+    @foreach (var empleado in Model.Empleados)
+    {
+        <tr>
+            <td>@empleado.Nombre</td>
+            <td>@empleado.ValorDocumentoIdentidad</td>
+            <td>@empleado.Puesto</td>
+           
+        </tr>
+    }
     </tbody>
 </table>

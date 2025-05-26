@@ -1,1 +1,4 @@
 /ProyectoPlanilla/obj
+/ProyectoPlanilla/bin
+**/obj/
+**/bin/

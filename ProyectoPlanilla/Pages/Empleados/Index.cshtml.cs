@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using ProyectoPlanilla.Data;
 using ProyectoPlanilla.Models;
@@ -13,12 +14,15 @@ namespace ProyectoPlanilla.Pages.Empleados
             _context = context;
         }
 
+        [BindProperty(SupportsGet = true)]
+        public string Filtro { get; set; } = string.Empty;
+
         public IList<Empleado> Empleados { get; set; } = new List<Empleado>();
         public string MensajeError { get; set; }
 
         public async Task OnGetAsync()
         {
-            var (empleados, resultado) = await _context.ObtenerEmpleadosActivos();
+            var (empleados, resultado) = await _context.ObtenerEmpleadosActivos(Filtro.Replace("-", ""));
 
             if (resultado == 0)
             {
@@ -27,7 +31,6 @@ namespace ProyectoPlanilla.Pages.Empleados
             else
             {
                 MensajeError = "Error al obtener los empleados activos. Código de error: " + resultado;
-                // Aquí podrías loguear el error o manejarlo de otra manera
             }
         }
     }
