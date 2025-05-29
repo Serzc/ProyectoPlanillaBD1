@@ -1,0 +1,105 @@
+﻿@* PlanillaSemanal.cshtml *@
+@page
+@model ProyectoPlanilla.Pages.Planilla.PlanillaSemanalModel
+
+<h2>Planillas Semanales</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Periodo</th>
+            <th>Salario Bruto</th>
+            <th>Deducciones</th>
+            <th>Salario Neto</th>
+            <th>Horas Ordinarias</th>
+            <th>Horas Extras Normales</th>
+            <th>Horas Extras Dobles</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var planilla in Model.Planillas)
+        {
+            <tr>
+                <td>@planilla.FechaInicio.ToShortDateString() - @planilla.FechaFin.ToShortDateString()</td>
+                <td>
+                    <a asp-page="./PlanillaSemanal" asp-route-idEmpleado="@ViewData["IdEmpleado"]" 
+                       asp-route-IdPlanillaSeleccionada="@planilla.Id" asp-route-TipoDetalle="movimientos">
+                        @planilla.SalarioBruto.ToString("C")
+                    </a>
+                </td>
+                <td>
+                    <a asp-page="./PlanillaSemanal" asp-route-idEmpleado="@ViewData["IdEmpleado"]" 
+                       asp-route-IdPlanillaSeleccionada="@planilla.Id" asp-route-TipoDetalle="deducciones">
+                        @planilla.TotalDeducciones.ToString("C")
+                    </a>
+                </td>
+                <td>@planilla.SalarioNeto.ToString("C")</td>
+                <td>@planilla.HorasOrdinarias</td>
+                <td>@planilla.HorasExtrasNormales</td>
+                <td>@planilla.HorasExtrasDobles</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (Model.IdPlanillaSeleccionada.HasValue)
+{
+    <h3>Detalle de @Model.TipoDetalle</h3>
+    
+    @if (Model.TipoDetalle == "deducciones")
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Deducción</th>
+                    <th>Porcentaje</th>
+                    <th>Monto</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var deduccion in Model.DetalleDeducciones)
+                {
+                    <tr>
+                        <td>@deduccion.Nombre</td>
+                        <td>@(deduccion.Porcentaje?.ToString("P") ?? "Fijo")</td>
+                        <td>@deduccion.Monto.ToString("C")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else if (Model.TipoDetalle == "movimientos")
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Entrada</th>
+                    <th>Salida</th>
+                    <th>Horas Ordinarias</th>
+                    <th>Monto Ordinario</th>
+                    <th>Horas Extras</th>
+                    <th>Monto Extras</th>
+                    <th>Horas Dobles</th>
+                    <th>Monto Dobles</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var movimiento in Model.DetalleMovimientos)
+                {
+                    <tr>
+                        <td>@movimiento.Fecha.ToShortDateString()</td>
+                        <td>@movimiento.HoraEntrada.ToString(@"hh\:mm")</td>
+                        <td>@movimiento.HoraSalida.ToString(@"hh\:mm")</td>
+                        <td>@movimiento.HorasOrdinarias</td>
+                        <td>@movimiento.MontoOrdinario.ToString("C")</td>
+                        <td>@movimiento.HorasExtrasNormales</td>
+                        <td>@movimiento.MontoExtrasNormales.ToString("C")</td>
+                        <td>@movimiento.HorasExtrasDobles</td>
+                        <td>@movimiento.MontoExtrasDobles.ToString("C")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}

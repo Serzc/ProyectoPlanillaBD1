@@ -1,0 +1,56 @@
+﻿@* PlanillaMensual.cshtml *@
+@page
+@model ProyectoPlanilla.Pages.Planilla.PlanillaMensualModel
+
+<h2>Planillas Mensuales</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Periodo</th>
+            <th>Salario Bruto</th>
+            <th>Deducciones</th>
+            <th>Salario Neto</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var planilla in Model.Planillas)
+        {
+            <tr>
+                <td>@planilla.FechaInicio.ToString("MMM yyyy")</td>
+                <td>@planilla.SalarioBruto.ToString("C")</td>
+                <td>
+                    <a asp-page="./PlanillaMensual" asp-route-idEmpleado="@ViewData["IdEmpleado"]" 
+                       asp-route-IdPlanillaSeleccionada="@planilla.id">
+                        @planilla.TotalDeducciones.ToString("C")
+                    </a>
+                </td>
+                <td>@planilla.SalarioNeto.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (Model.IdPlanillaSeleccionada.HasValue && Model.DetalleDeducciones.Any())
+{
+    <h3>Detalle de Deducciones</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Deducción</th>
+                <th>Porcentaje</th>
+                <th>Monto</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var deduccion in Model.DetalleDeducciones)
+            {
+                <tr>
+                    <td>@deduccion.Nombre</td>
+                    <td>@(deduccion.Porcentaje?.ToString("P") ?? "Fijo")</td>
+                    <td>@deduccion.Monto.ToString("C")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

@@ -1,0 +1,58 @@
+﻿@* Create.cshtml *@
+@page
+@model ProyectoPlanilla.Pages.Empleados.CreateModel
+
+<h2>Nuevo Empleado</h2>
+
+<form method="post">
+      
+    <div class="form-group">
+        <label asp-for="Empleado.Nombre"></label>
+        <input asp-for="Empleado.Nombre" class="form-control" />
+        <span asp-validation-for="Empleado.Nombre" class="text-danger"></span>
+    </div>
+    
+    <div class="form-group">
+        <label asp-for="Empleado.idTipoDocumento"></label>
+        <select asp-for="Empleado.idTipoDocumento" class="form-control">
+            @foreach (var tipo in Model.TiposDocumento)
+            {
+                <option value="@tipo.id">@tipo.Nombre</option>
+            }
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label asp-for="Empleado.ValorDocumentoIdentidad"></label>
+        <input asp-for="Empleado.ValorDocumentoIdentidad" class="form-control" />
+        <span asp-validation-for="Empleado.ValorDocumentoIdentidad" class="text-danger"></span>
+    </div>
+    
+    <div class="form-group">
+        <label asp-for="Empleado.FechaNacimiento"></label>
+        <input asp-for="Empleado.FechaNacimiento" type="date" class="form-control" />
+    </div>
+    
+    <div class="form-group">
+        <label asp-for="Empleado.idPuesto"></label>
+        <select asp-for="Empleado.idPuesto" class="form-control">
+            @foreach (var puesto in Model.Puestos)
+            {
+                <option value="@puesto.id">@puesto.Nombre</option>
+            }
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label asp-for="Empleado.idDepartamento"></label>
+        <select asp-for="Empleado.idDepartamento" class="form-control">
+            @foreach (var depto in Model.Departamentos)
+            {
+                <option value="@depto.id">@depto.Nombre</option>
+            }
+        </select>
+    </div>
+    
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    <a asp-page="./Index" class="btn btn-secondary">Cancelar</a>
+</form>

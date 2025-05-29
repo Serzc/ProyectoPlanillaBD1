@@ -12,6 +12,7 @@ ALTER   PROCEDURE [dbo].[sp_obtenerEmpleadosFiltro]
 AS
 BEGIN
     SET NOCOUNT ON;
+	
 
     BEGIN TRY
         SELECT 
@@ -36,11 +37,14 @@ BEGIN
                   @inFiltro LIKE '%[^0-9]%' AND E.Nombre LIKE '%' + @inFiltro + '%'
               )
               OR (
-                  @inFiltro NOT LIKE '%[^0-9]%' AND E.ValorDocumentoIdentidad LIKE '%' + @inFiltro + '%'
+                  @inFiltro NOT LIKE '%[^0-9]%' 
+                  AND (
+                      REPLACE(E.ValorDocumentoIdentidad, '-', '') LIKE '%' + REPLACE(@inFiltro, '-', '') + '%'
+                      OR E.ValorDocumentoIdentidad LIKE '%' + @inFiltro + '%'
+                  )
               )
           )
         ORDER BY E.Nombre ASC
-        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER;
         ;
 
         RETURN 0;

@@ -11,12 +11,15 @@ namespace ProyectoPlanilla.Models
 
         [Required]
         public string ValorDocumentoIdentidad { get; set; }
-
+        public int idTipoDocumento { get; set; }
         public int idPuesto { get; set; }
         public string Puesto { get; set; }
-        
-    
+
+        public string FechaNacimiento { get; set; }
 
         public bool Activo { get; set; } = true;
+        public int idDepartamento { get; set; }
+        public string FechaContratacion { get; set; }
+        
     }
 }

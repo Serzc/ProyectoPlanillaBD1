@@ -3,6 +3,7 @@
 
 <h2>Empleados</h2>
 
+<a asp-page="./Create" class="btn btn-success">Nuevo Empleado</a>
 <form method="get">
     <input type="text" name="Filtro" value="@Model.Filtro" placeholder="Buscar por nombre o documento..." />
     <button type="submit">Buscar</button>
@@ -29,7 +30,10 @@
             <td>@empleado.Nombre</td>
             <td>@empleado.ValorDocumentoIdentidad</td>
             <td>@empleado.Puesto</td>
-           
+            <td>
+                <a asp-page="./Edit" asp-route-id="@empleado.id" class="btn btn-primary btn-sm">Editar</a>
+                <a asp-page="./PlanillaSemanal" asp-route-idEmpleado="@empleado.id" class="btn btn-info">Impersonar</a>
+            </td>
         </tr>
     }
     </tbody>
