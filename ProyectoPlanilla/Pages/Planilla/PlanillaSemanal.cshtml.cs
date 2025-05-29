@@ -28,18 +28,28 @@ namespace ProyectoPlanilla.Pages.Planilla
 
         public async Task OnGetAsync(int idEmpleado)
         {
-            Planillas = await _context.GetPlanillasSemanales(idEmpleado, 15);
-
-            if (IdPlanillaSeleccionada.HasValue)
+            try
             {
-                if (TipoDetalle == "deducciones")
+                Planillas = await _context.GetPlanillasSemanales(idEmpleado, 15);
+
+                if (IdPlanillaSeleccionada.HasValue)
                 {
-                    DetalleDeducciones = await _context.GetDetalleDeducciones(IdPlanillaSeleccionada.Value);
+                    if (TipoDetalle == "deducciones")
+                    {
+                        DetalleDeducciones = await _context.GetDetalleDeducciones(IdPlanillaSeleccionada.Value);
+                    }
+                    else if (TipoDetalle == "movimientos")
+                    {
+                        DetalleMovimientos = await _context.GetDetalleMovimientos(IdPlanillaSeleccionada.Value);
+                    }
                 }
-                else if (TipoDetalle == "movimientos")
-                {
-                    DetalleMovimientos = await _context.GetDetalleMovimientos(IdPlanillaSeleccionada.Value);
-                }
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Error al cargar las planillas semanales: {ex.Message}");
+                Planillas = new List<Models.PlanillaSemanal>();
+                DetalleDeducciones = new List<Models.DetalleDeduccion>();
+                DetalleMovimientos = new List<Models.DetalleMovimiento>();
             }
         }
     }

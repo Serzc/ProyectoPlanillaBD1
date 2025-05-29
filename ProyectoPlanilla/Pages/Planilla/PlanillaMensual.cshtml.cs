@@ -23,12 +23,22 @@ namespace ProyectoPlanilla.Pages.Planilla
 
         public async Task OnGetAsync(int idEmpleado)
         {
-            Planillas = await _context.GetPlanillasMensuales(idEmpleado, 12);
-
-            if (IdPlanillaSeleccionada.HasValue)
+            try
             {
-                DetalleDeducciones = await _context.GetDetalleDeduccionesMensuales(IdPlanillaSeleccionada.Value);
+                Planillas = await _context.GetPlanillasMensuales(idEmpleado, 12);
+
+                if (IdPlanillaSeleccionada.HasValue)
+                {
+                    DetalleDeducciones = await _context.GetDetalleDeduccionesMensuales(IdPlanillaSeleccionada.Value);
+                }
             }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Error al cargar las planillas mensuales: {ex.Message}");
+                Planillas = new List<PlanillaMensual>();
+                DetalleDeducciones = new List<DetalleDeduccion>();
+            }
+            
         }
     }
 
