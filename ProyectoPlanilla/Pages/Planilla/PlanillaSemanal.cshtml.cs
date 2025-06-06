@@ -28,6 +28,7 @@ namespace ProyectoPlanilla.Pages.Planilla
 
         public async Task OnGetAsync(int idEmpleado)
         {
+            Console.WriteLine($"PlanillaSemanalModel OnGetAsync called with idEmpleado: {idEmpleado}");
             try
             {
                 Planillas = await _context.GetPlanillasSemanales(idEmpleado, 15);

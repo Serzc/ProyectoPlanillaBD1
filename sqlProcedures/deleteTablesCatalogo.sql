@@ -13,6 +13,17 @@ BEGIN TRY
     DELETE FROM Puesto;
     DELETE FROM TipoJornada;
     DELETE FROM TipoDocumentoIdentidad;
+    DELETE FROM JornadaEmpleado;
+    DELETE FROM MesPlanilla;
+    DELETE FROM SemanaPlanilla;
+    DELETE FROM PlanillaSemXEmpleado;
+    DELETE FROM PlanillaMexXEmpleado;
+    DELETE FROM MovimientoPlanilla;
+    DELETE FROM DeduccionesXEmpleadoxMes;
+    DELETE FROM EventLog;
+    DELETE FROM Asistencia;
+    DELETE FROM MovimientoXHora;
+
     
     COMMIT TRANSACTION;
     PRINT 'Todos los datos fueron eliminados exitosamente.';

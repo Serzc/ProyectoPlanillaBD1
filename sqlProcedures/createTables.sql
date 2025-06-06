@@ -139,7 +139,6 @@ CREATE TABLE MovimientoPlanilla (
     idPlanillaSemXEmpleado INT NOT NULL,
     idTipoMovimiento INT NOT NULL,
     Fecha DATE NOT NULL,
-    CantidadHoras DECIMAL(5,2) NULL,
     Monto DECIMAL(12,2) NOT NULL,
     Descripcion VARCHAR(255) NULL,
     FOREIGN KEY (idPlanillaSemXEmpleado) REFERENCES PlanillaSemXEmpleado(id),
@@ -176,4 +175,19 @@ CREATE TABLE Asistencia (
     HoraSalida DATETIME NOT NULL,
     Procesado BIT NOT NULL DEFAULT 0,
     FOREIGN KEY (idEmpleado) REFERENCES Empleado(id)
+);
+
+CREATE TABLE MovimientoXHora (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    idMovimiento INT NOT NULL,
+    idAsistencia INT NOT NULL,
+    CantidadHoras DECIMAL(5,2) NULL,
+    FOREIGN KEY (idMovimiento) REFERENCES MovimientoPlanilla(id),
+    FOREIGN KEY (idAsistencia) REFERENCES Asistencia(id)
+
+);
+
+CREATE TABLE TipoError (
+    id INT PRIMARY KEY,
+    Descripcion VARCHAR(100) NOT NULL
 );

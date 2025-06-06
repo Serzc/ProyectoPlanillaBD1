@@ -292,6 +292,14 @@ BEGIN TRY
     FROM @xmlData.nodes('/Catalogo/TiposdeEvento/TipoEvento') AS T(evento)
     WHERE NOT EXISTS (SELECT 1 FROM TipoEvento WHERE id = evento.value('@Id', 'INT'));
 
+    INSERT INTO TipoError (id, Descripcion)
+    SELECT 
+        error.value('@Codigo', 'INT'),
+        error.value('@Descripcion', 'VARCHAR(255)')
+    FROM @xmlData.nodes('/Catalogo/Errores/Error') AS T(error)
+    WHERE NOT EXISTS (SELECT 1 FROM TipoError WHERE Codigo = error.value('@Codigo', 'INT'));
+
+
     -- 9. Cargar Usuarios
     INSERT INTO Usuario (Username, Password, Tipo, idEmpleado)
     SELECT 

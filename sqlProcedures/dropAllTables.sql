@@ -18,3 +18,4 @@ DROP TABLE IF EXISTS Departamento;
 DROP TABLE IF EXISTS Puesto;
 DROP TABLE IF EXISTS TipoJornada;
 DROP TABLE IF EXISTS TipoDocumentoIdentidad;
+DROP TABLE IF EXISTS MovimientoXHora;

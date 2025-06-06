@@ -31,8 +31,8 @@
             <td>@empleado.ValorDocumentoIdentidad</td>
             <td>@empleado.Puesto</td>
             <td>
-                <a asp-page="./Edit" asp-route-id="@empleado.id" class="btn btn-primary btn-sm">Editar</a>
-                <a asp-page="./PlanillaSemanal" asp-route-idEmpleado="@empleado.id" class="btn btn-info">Impersonar</a>
+                <a asp-page="./Editar" asp-route-id="@empleado.id" class="btn btn-primary btn-sm">Editar</a>
+                <a asp-page="../Planilla/PlanillaSemanal" asp-route-idEmpleado="@empleado.id" class="btn btn-info">Impersonar</a>
             </td>
         </tr>
     }

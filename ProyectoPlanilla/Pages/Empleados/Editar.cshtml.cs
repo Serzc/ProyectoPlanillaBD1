@@ -24,23 +24,28 @@ namespace ProyectoPlanilla.Pages.Empleados
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
+            Console.WriteLine($"EditModel OnGetAsync called with id: {id}");
             try
-            { 
-                Empleado = await _context.GetEmpleadoById(id.Value) ?? new Empleado {
-                Nombre = "No encontrado",
-                ValorDocumentoIdentidad = "N/A",
-                Puesto = "N/A" };
+            {
+                Empleado = await _context.GetEmpleadoById(id.Value) ?? new Empleado
+                {
+                    Nombre = "No encontrado",
+                    ValorDocumentoIdentidad = "N/A",
+                    Puesto = "N/A"
+                };
                 Puestos = await _context.GetPuestos() ?? new List<Puesto>();
-                Departamentos = await _context.GetDepartamentos()?? new List<Departamento>();
-                TiposDocumento = await _context.GetTiposDocumento()?? new List<TipoDocumentoIdentidad>(); 
+                Departamentos = await _context.GetDepartamentos() ?? new List<Departamento>();
+                TiposDocumento = await _context.GetTiposDocumento() ?? new List<TipoDocumentoIdentidad>();
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError("", $"Error al cargar los datos del empleado: {ex.Message}");
-                Empleado = new Empleado {
+                Empleado = new Empleado
+                {
                     Nombre = "No encontrado",
                     ValorDocumentoIdentidad = "N/A",
-                    Puesto = "N/A" };
+                    Puesto = "N/A"
+                };
                 Puestos = new List<Puesto>();
                 Departamentos = new List<Departamento>();
                 TiposDocumento = new List<TipoDocumentoIdentidad>();

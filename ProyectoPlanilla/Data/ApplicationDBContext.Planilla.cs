@@ -35,9 +35,16 @@ namespace ProyectoPlanilla.Data
                         Direction = ParameterDirection.Input,
                         Value = cantidad
                     };
+                    var outResultado = new SqlParameter
+                    {
+                        ParameterName = "@outResultado",
+                        SqlDbType = SqlDbType.Int,
+                        Direction = ParameterDirection.Output
+                    };
 
                     command.Parameters.Add(inIdEmpleado);
                     command.Parameters.Add(inCantidad);
+                    command.Parameters.Add(outResultado);
 
                     await Database.OpenConnectionAsync();
 
