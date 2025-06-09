@@ -85,9 +85,9 @@ BEGIN
                     IF @resultadoParcial <> 0
                         SET @outResultado = @resultadoParcial;
                 END
-                EXEC sp_RepararPlanilla @fechaActual, @outResultado = @resultadoParcial OUTPUT;
-                IF @resultadoParcial <> 0
-                    SET @outResultado = @resultadoParcial;
+                --EXEC sp_RepararPlanilla @fechaActual, @outResultado = @resultadoParcial OUTPUT;
+                --IF @resultadoParcial <> 0
+                --    SET @outResultado = @resultadoParcial;
             END
             
             SET @i = @i + 1;

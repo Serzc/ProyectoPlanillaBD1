@@ -5,13 +5,13 @@ BEGIN TRY
     DELETE FROM EmpleadoDeduccion;
     DELETE FROM JornadaEmpleado; 
     DELETE FROM DeduccionesXEmpleadoxMes;
+    DELETE FROM MovimientoXHora;
+    DELETE FROM Asistencia;
     DELETE FROM MovimientoPlanilla;
     DELETE FROM PlanillaSemXEmpleado;
-    DELETE FROM PlanillaMexXEmpleado;
+    DELETE FROM PlanillaMexXEmpleado;  
     DELETE FROM SemanaPlanilla;
     DELETE FROM MesPlanilla;
-    DELETE FROM Asistencia;
-    DELETE FROM MovimientoXHora;
     DELETE FROM DBError;
     DELETE FROM TipoError;
     DELETE FROM EventLog;

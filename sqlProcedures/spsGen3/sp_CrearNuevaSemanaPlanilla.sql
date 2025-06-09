@@ -16,38 +16,37 @@ BEGIN
         DECLARE @fechaInicioSemana DATE = DATEADD(DAY, 1, @inFechaJueves); -- Viernes
         DECLARE @fechaFinSemana DATE = DATEADD(DAY, 6, @fechaInicioSemana); -- Siguiente jueves
         
-        -- Determinar si necesitamos un nuevo mes
+        -- Determinar el mes de planilla correcto (basado en el mes natural del jueves de cierre)
+        DECLARE @mesNatural INT = MONTH(@inFechaJueves);
+        DECLARE @anioNatural INT = YEAR(@inFechaJueves);
         DECLARE @idMesPlanilla INT;
         DECLARE @esNuevoMes BIT = 0;
         
-        -- Buscar mes existente que contenga el viernes de inicio
+        -- Buscar mes existente para este periodo
         SELECT @idMesPlanilla = id
         FROM MesPlanilla
-        WHERE @fechaInicioSemana BETWEEN FechaInicio AND FechaFin;
+        WHERE Mes = @mesNatural 
+          AND Anio = @anioNatural
+          AND Cerrado = 0;
         
         -- Si no existe mes, crear uno nuevo
         IF @idMesPlanilla IS NULL
         BEGIN
-            -- Calcular el primer jueves del mes que contiene el viernes de inicio
-            DECLARE @primerJueves DATE = 
-                DATEADD(DAY, -((DATEPART(DAY, @fechaInicioSemana) + DATEPART(WEEKDAY, @fechaInicioSemana) + 5) % 7), @fechaInicioSemana);
+            -- Calcular el primer jueves del mes natural
+            DECLARE @primerDiaMes DATE = DATEFROMPARTS(@anioNatural, @mesNatural, 1);
+            DECLARE @primerJueves DATE = DATEADD(DAY, (5 - DATEPART(WEEKDAY, @primerDiaMes) + 7) % 7, @primerDiaMes);
             
-            -- Asegurarnos que es jueves (5)
-            WHILE DATEPART(WEEKDAY, @primerJueves) <> 5
-                SET @primerJueves = DATEADD(DAY, 1, @primerJueves);
+            -- Calcular el último jueves del mes natural
+            DECLARE @ultimoDiaMes DATE = EOMONTH(@primerDiaMes);
+            DECLARE @ultimoJueves DATE = DATEADD(DAY, -((DATEPART(WEEKDAY, @ultimoDiaMes) + 1) % 7), @ultimoDiaMes);
             
-            -- Calcular el último jueves del mes
-            DECLARE @ultimoJueves DATE = DATEADD(DAY, -1, DATEADD(MONTH, 1, @primerJueves));
-            WHILE DATEPART(WEEKDAY, @ultimoJueves) <> 5
-                SET @ultimoJueves = DATEADD(DAY, -1, @ultimoJueves);
-            
-            -- Insertar nuevo mes
+            -- Insertar nuevo mes con el rango completo desde el primer viernes hasta el último jueves
             INSERT INTO MesPlanilla (Anio, Mes, FechaInicio, FechaFin, Cerrado)
             VALUES (
-                YEAR(@primerJueves),
-                MONTH(@primerJueves),
-                @primerJueves,
-                @ultimoJueves,
+                @anioNatural,
+                @mesNatural,
+                DATEADD(DAY, 1, @primerJueves), -- Primer viernes
+                @ultimoJueves, -- Último jueves
                 0
             );
             
@@ -55,11 +54,15 @@ BEGIN
             SET @esNuevoMes = 1;
         END
         
-        -- Verificar nuevamente que tenemos un idMesPlanilla válido
-        IF @idMesPlanilla IS NULL
+        -- Verificar que la semana no exista ya
+        IF EXISTS (
+            SELECT 1 FROM SemanaPlanilla 
+            WHERE FechaInicio = @fechaInicioSemana 
+              AND FechaFin = @fechaFinSemana
+        )
         BEGIN
-            SET @outResultado = 50024;
-            THROW 50024, 'No se pudo determinar o crear el mes de planilla', 1;
+            SET @outResultado = 50025;
+            THROW 50025, 'La semana ya existe', 1;
         END
         
         -- Crear nueva semana

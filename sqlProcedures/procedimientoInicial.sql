@@ -1,6 +1,6 @@
-DECLARE @resultado INT;
-EXEC sp_InicializarPlanilla '2023-06-01', @resultado OUTPUT;
-SELECT @resultado AS ResultadoInicializacion;
+--DECLARE @resultado INT;
+--EXEC sp_InicializarPlanilla '2023-06-01', @resultado OUTPUT;
+--SELECT @resultado AS ResultadoInicializacion;
 
 --LOAD CATALOGO=================================================================
 BEGIN TRY
@@ -254,7 +254,7 @@ BEGIN TRY
     INSERT INTO Puesto (Nombre, SalarioXHora)
     SELECT 
         puesto.value('@Nombre', 'VARCHAR(100)'),
-        puesto.value('@SalarioXHora', 'DECIMAL(10,2)')
+        puesto.value('@SalarioXHora', 'DECIMAL(25,4)')
     FROM @xmlData.nodes('/Catalogo/Puestos/Puesto') AS T(puesto)
     WHERE NOT EXISTS (SELECT 1 FROM Puesto WHERE Nombre = puesto.value('@Nombre', 'VARCHAR(100)'));
 
@@ -294,7 +294,7 @@ BEGIN TRY
         ded.value('@Nombre', 'VARCHAR(100)'),
         CASE WHEN ded.value('@Obligatorio', 'VARCHAR(2)') = 'Si' THEN 1 ELSE 0 END,
         CASE WHEN ded.value('@Porcentual', 'VARCHAR(2)') = 'Si' THEN 1 ELSE 0 END,
-        ded.value('@Valor', 'DECIMAL(10,2)')
+        ded.value('@Valor', 'DECIMAL(25,4)')
     FROM @xmlData.nodes('/Catalogo/TiposDeDeduccion/TipoDeDeduccion') AS T(ded)
     WHERE NOT EXISTS (SELECT 1 FROM TipoDeduccion WHERE id = ded.value('@Id', 'INT'));
 

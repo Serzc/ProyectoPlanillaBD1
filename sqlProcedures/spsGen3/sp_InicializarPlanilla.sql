@@ -22,7 +22,7 @@ BEGIN
         VALUES (
             YEAR(@primerJueves),
             MONTH(@primerJueves),
-            @primerJueves,
+            DATEADD(DAY, 1, @primerJueves),
             @ultimoJueves,
             0
         );

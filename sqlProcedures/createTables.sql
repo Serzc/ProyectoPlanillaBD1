@@ -14,7 +14,7 @@ CREATE TABLE TipoJornada (
 CREATE TABLE Puesto (
     id INT IDENTITY(1,1) PRIMARY KEY,
     Nombre VARCHAR(100) NOT NULL,
-    SalarioXHora DECIMAL(10,2) NOT NULL
+    SalarioXHora DECIMAL(25,4) NOT NULL
 );
 
 CREATE TABLE Departamento (
@@ -38,7 +38,7 @@ CREATE TABLE TipoDeduccion (
     Nombre VARCHAR(100) NOT NULL,
     Obligatorio BIT NOT NULL,
     Porcentual BIT NOT NULL,
-    Valor DECIMAL(10,2) NOT NULL
+    Valor DECIMAL(25,4) NOT NULL
 );
 
 CREATE TABLE TipoEvento (
@@ -89,8 +89,8 @@ CREATE TABLE EmpleadoDeduccion (
     id INT IDENTITY(1,1) PRIMARY KEY,
     idEmpleado INT NOT NULL,
     idTipoDeduccion INT NOT NULL,
-    ValorPorcentual DECIMAL(5,2) NULL,
-    ValorFijo DECIMAL(10,2) NULL,
+    ValorPorcentual DECIMAL(25,4) NULL,
+    ValorFijo DECIMAL(25,4) NULL,
     FechaAsociacion DATE NOT NULL DEFAULT GETDATE(),
     FechaDesasociacion DATE NULL,
     FOREIGN KEY (idEmpleado) REFERENCES Empleado(id),
@@ -130,9 +130,9 @@ CREATE TABLE PlanillaSemXEmpleado (
     id INT IDENTITY(1,1) PRIMARY KEY,
     idSemanaPlanilla INT NOT NULL,
     idEmpleado INT NOT NULL,
-    SalarioBruto DECIMAL(12,2) NOT NULL DEFAULT 0,
-    TotalDeducciones DECIMAL(12,2) NOT NULL DEFAULT 0,
-    SalarioNeto DECIMAL(12,2) NOT NULL DEFAULT 0,
+    SalarioBruto DECIMAL(25,4) NOT NULL DEFAULT 0,
+    TotalDeducciones DECIMAL(25,4) NOT NULL DEFAULT 0,
+    SalarioNeto DECIMAL(25,4) NOT NULL DEFAULT 0,
     FOREIGN KEY (idSemanaPlanilla) REFERENCES SemanaPlanilla(id),
     FOREIGN KEY (idEmpleado) REFERENCES Empleado(id)
 );
@@ -141,9 +141,9 @@ CREATE TABLE PlanillaMexXEmpleado (
     id INT IDENTITY(1,1) PRIMARY KEY,
     idMesPlanilla INT NOT NULL,
     idEmpleado INT NOT NULL,
-    SalarioBruto DECIMAL(12,2) NOT NULL DEFAULT 0,
-    TotalDeducciones DECIMAL(12,2) NOT NULL DEFAULT 0,
-    SalarioNeto DECIMAL(12,2) NOT NULL DEFAULT 0,
+    SalarioBruto DECIMAL(25,4) NOT NULL DEFAULT 0,
+    TotalDeducciones DECIMAL(25,4) NOT NULL DEFAULT 0,
+    SalarioNeto DECIMAL(25,4) NOT NULL DEFAULT 0,
     FOREIGN KEY (idMesPlanilla) REFERENCES MesPlanilla(id),
     FOREIGN KEY (idEmpleado) REFERENCES Empleado(id)
 );
@@ -153,7 +153,7 @@ CREATE TABLE MovimientoPlanilla (
     idPlanillaSemXEmpleado INT NOT NULL,
     idTipoMovimiento INT NOT NULL,
     Fecha DATE NOT NULL,
-    Monto DECIMAL(12,2) NOT NULL,
+    Monto DECIMAL(25,4) NOT NULL,
     Descripcion VARCHAR(255) NULL,
     FOREIGN KEY (idPlanillaSemXEmpleado) REFERENCES PlanillaSemXEmpleado(id),
     FOREIGN KEY (idTipoMovimiento) REFERENCES TipoMovimiento(id)
@@ -163,7 +163,7 @@ CREATE TABLE DeduccionesXEmpleadoxMes (
     id INT IDENTITY(1,1) PRIMARY KEY,
     idPlanillaMexXEmpleado INT NOT NULL,
     idTipoDeduccion INT NOT NULL,
-    Monto DECIMAL(12,2) NOT NULL,
+    Monto DECIMAL(25,4) NOT NULL,
     FOREIGN KEY (idPlanillaMexXEmpleado) REFERENCES PlanillaMexXEmpleado(id),
     FOREIGN KEY (idTipoDeduccion) REFERENCES TipoDeduccion(id)
 );
@@ -195,7 +195,7 @@ CREATE TABLE MovimientoXHora (
     id INT IDENTITY(1,1) PRIMARY KEY,
     idMovimiento INT NOT NULL,
     idAsistencia INT NOT NULL,
-    CantidadHoras DECIMAL(5,2) NULL,
+    CantidadHoras DECIMAL(25,4) NULL,
     FOREIGN KEY (idMovimiento) REFERENCES MovimientoPlanilla(id),
     FOREIGN KEY (idAsistencia) REFERENCES Asistencia(id)
 

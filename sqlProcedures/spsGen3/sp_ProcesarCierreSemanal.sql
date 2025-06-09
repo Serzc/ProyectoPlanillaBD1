@@ -12,14 +12,15 @@ BEGIN
         DECLARE @semanasEnMes INT;
         
         -- Obtener semana de planilla actual
-        SELECT 
+        SELECT TOP 1
             @idSemanaPlanilla = sp.id,
             @idMesPlanilla = sp.idMesPlanilla,
             @fechaInicioSemana = sp.FechaInicio,
             @fechaFinSemana = sp.FechaFin
         FROM SemanaPlanilla sp
         WHERE @inFecha BETWEEN sp.FechaInicio AND sp.FechaFin
-        AND sp.Cerrado = 0;
+        AND sp.Cerrado = 0
+        ORDER BY sp.FechaInicio DESC;
         
         IF @idSemanaPlanilla IS NULL
         BEGIN
@@ -45,7 +46,7 @@ BEGIN
         DECLARE @deduccionesProcesar TABLE (
             idPlanillaSemXEmpleado INT,
             idTipoDeduccion INT,
-            Monto DECIMAL(12,2)
+            Monto DECIMAL(25,4)
         );
         
         -- Procesar todos los empleados con planilla en esta semana
