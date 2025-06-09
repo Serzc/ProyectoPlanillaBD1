@@ -20,3 +20,20 @@ El script que hace la simulación y su corrida.
     por implementar
 El código en capa lógica para el sitio web ya sea que el susuario es administrador o empleado.
 El código de los SP para realizar los crud, las simulaciones y todas las consultas.
+
+
+usar vista para facilitar varios joints para facilitar la consulta.
+
+
+Flujo:
+1. sp_InicializarPlanilla
+2. cargar catalogos
+3.  DECLARE @xmlOperacion XML = '...'; -- Tu XML aquí
+    DECLARE @resultado INT;
+
+    EXEC sp_procesarOperacionXML @xmlOperacion, @outResultado = @resultado OUTPUT;
+
+    IF @resultado <> 0
+        PRINT 'Error durante el procesamiento: ' + CAST(@resultado AS VARCHAR);
+    ELSE
+        PRINT 'Procesamiento completado con éxito';

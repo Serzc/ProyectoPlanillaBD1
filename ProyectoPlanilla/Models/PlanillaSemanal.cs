@@ -10,8 +10,8 @@ namespace ProyectoPlanilla.Models
         public decimal SalarioBruto { get; set; }
         public decimal TotalDeducciones { get; set; }
         public decimal SalarioNeto { get; set; }
-        public int HorasOrdinarias { get; set; }
-        public int HorasExtrasNormales { get; set; }
-        public int HorasExtrasDobles { get; set; }
+        public decimal HorasOrdinarias { get; set; }
+        public decimal HorasExtrasNormales { get; set; }
+        public decimal HorasExtrasDobles { get; set; }
     }
 }

@@ -60,9 +60,9 @@ namespace ProyectoPlanilla.Data
                                 SalarioBruto = reader.GetDecimal(reader.GetOrdinal("SalarioBruto")),
                                 TotalDeducciones = reader.GetDecimal(reader.GetOrdinal("TotalDeducciones")),
                                 SalarioNeto = reader.GetDecimal(reader.GetOrdinal("SalarioNeto")),
-                                HorasOrdinarias = reader.GetInt32(reader.GetOrdinal("HorasOrdinarias")),
-                                HorasExtrasNormales = reader.GetInt32(reader.GetOrdinal("HorasExtrasNormales")),
-                                HorasExtrasDobles = reader.GetInt32(reader.GetOrdinal("HorasExtrasDobles"))
+                                HorasOrdinarias = reader.GetDecimal(reader.GetOrdinal("HorasOrdinarias")),
+                                HorasExtrasNormales = reader.GetDecimal(reader.GetOrdinal("HorasExtrasNormales")),
+                                HorasExtrasDobles = reader.GetDecimal(reader.GetOrdinal("HorasExtrasDobles"))
                             };
                             planillas.Add(planilla);
                         }
@@ -94,7 +94,13 @@ namespace ProyectoPlanilla.Data
                         Direction = ParameterDirection.Input,
                         Value = idPlanilla
                     };
-
+                    var outResultado = new SqlParameter
+                    {
+                        ParameterName = "@outResultado",
+                        SqlDbType = SqlDbType.Int,
+                        Direction = ParameterDirection.Output
+                    };
+                    command.Parameters.Add(outResultado);
                     command.Parameters.Add(inIdPlanilla);
 
                     await Database.OpenConnectionAsync();
@@ -139,7 +145,13 @@ namespace ProyectoPlanilla.Data
                         Direction = ParameterDirection.Input,
                         Value = idPlanilla
                     };
-
+                    var outResultado = new SqlParameter
+                    {
+                        ParameterName = "@outResultado",
+                        SqlDbType = SqlDbType.Int,
+                        Direction = ParameterDirection.Output
+                    };
+                    command.Parameters.Add(outResultado);
                     command.Parameters.Add(inIdPlanilla);
 
                     await Database.OpenConnectionAsync();
@@ -192,7 +204,13 @@ namespace ProyectoPlanilla.Data
                         Direction = ParameterDirection.Input,
                         Value = cantidad
                     };
-
+                    var outResultado = new SqlParameter
+                    {
+                        ParameterName = "@outResultado",
+                        SqlDbType = SqlDbType.Int,
+                        Direction = ParameterDirection.Output
+                    };
+                    command.Parameters.Add(outResultado);
                     command.Parameters.Add(inIdEmpleado);
                     command.Parameters.Add(inCantidad);
 
@@ -241,7 +259,13 @@ namespace ProyectoPlanilla.Data
                         Direction = ParameterDirection.Input,
                         Value = idPlanilla
                     };
-
+                    var outResultado = new SqlParameter
+                    {
+                        ParameterName = "@outResultado",
+                        SqlDbType = SqlDbType.Int,
+                        Direction = ParameterDirection.Output
+                    };
+                    command.Parameters.Add(outResultado);
                     command.Parameters.Add(inIdPlanilla);
 
                     await Database.OpenConnectionAsync();

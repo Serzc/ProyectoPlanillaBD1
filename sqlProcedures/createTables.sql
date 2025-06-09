@@ -45,7 +45,21 @@ CREATE TABLE TipoEvento (
     id INT PRIMARY KEY,
     Nombre VARCHAR(100) NOT NULL
 );
-
+--<TipoEvento Id="1" Nombre="Login"/>
+--<TipoEvento Id="2" Nombre="Logout"/>
+--<TipoEvento Id="3" Nombre="Listar empleados"/>
+--<TipoEvento Id="4" Nombre="Listar empleados con filtro"/>
+--<TipoEvento Id="5" Nombre="Insertar empleado"/>
+--<TipoEvento Id="6" Nombre="Eliminar empleado"/>
+--<TipoEvento Id="7" Nombre="Editar empleado"/>
+--<TipoEvento Id="8" Nombre="Asociar deducción"/>
+--<TipoEvento Id="9" Nombre="Desasociar deducción"/>
+--<TipoEvento Id="10" Nombre="Consultar una planilla semanal"/>
+--<TipoEvento Id="11" Nombre="Consultar una planilla mensual"/>
+--<TipoEvento Id="12" Nombre="Impersonar empleado"/>
+--<TipoEvento Id="13" Nombre="Regresar a interfaz de administrador"/>
+--<TipoEvento Id="14" Nombre="Ingreso de marcas de asistencia"/>
+--<TipoEvento Id="15" Nombre="Ingreso nuevas jornadas"/>
 -- Tablas de operación
 CREATE TABLE Usuario (
     id INT IDENTITY(1,1) PRIMARY KEY,
@@ -190,4 +204,12 @@ CREATE TABLE MovimientoXHora (
 CREATE TABLE TipoError (
     id INT PRIMARY KEY,
     Descripcion VARCHAR(100) NOT NULL
+);
+CREATE TABLE DBError (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    FechaHora DATETIME NOT NULL DEFAULT GETDATE(),
+    idTipoError INT NOT NULL,
+    Mensaje NVARCHAR(MAX) NOT NULL,
+    Procedimiento NVARCHAR(100) NULL,
+    Linea INT NULL
 );
