@@ -44,7 +44,7 @@ BEGIN
             DECLARE @idEmpleado INT, @idSemanaPlanilla INT, @idPlanillaSemXEmpleado INT;
             
             SELECT @idEmpleado = id 
-            FROM Empleado 
+            FROM dbo.Empleado 
             WHERE ValorDocumentoIdentidad = @valorDoc AND Activo = 1;
             
             IF @idEmpleado IS NULL
@@ -55,11 +55,11 @@ BEGIN
             ELSE
             BEGIN
                 -- Obtener semana de planilla actual
-                SELECT @idSemanaPlanilla = sp.id
-                FROM SemanaPlanilla sp
-                JOIN MesPlanilla mp ON sp.idMesPlanilla = mp.id
-                WHERE @inFecha BETWEEN sp.FechaInicio AND sp.FechaFin
-                AND mp.Cerrado = 0;
+                SELECT @idSemanaPlanilla = SP.id
+                FROM dbo.SemanaPlanilla AS SP
+                JOIN dbo.MesPlanilla AS MP ON SP.idMesPlanilla = MP.id
+                WHERE @inFecha BETWEEN SP.FechaInicio AND SP.FechaFin
+                AND MP.Cerrado = 0;
                 
                 IF @idSemanaPlanilla IS NULL
                 BEGIN
@@ -70,20 +70,45 @@ BEGIN
                 BEGIN
                     -- Obtener o crear planilla semanal del empleado
                     SELECT @idPlanillaSemXEmpleado = id
-                    FROM PlanillaSemXEmpleado
-                    WHERE idSemanaPlanilla = @idSemanaPlanilla AND idEmpleado = @idEmpleado;
+                    FROM dbo.PlanillaSemXEmpleado
+                    WHERE idSemanaPlanilla = @idSemanaPlanilla 
+                        AND idEmpleado = @idEmpleado;
                     
                     IF @idPlanillaSemXEmpleado IS NULL
                     BEGIN
-                        INSERT INTO PlanillaSemXEmpleado (idSemanaPlanilla, idEmpleado, SalarioBruto, TotalDeducciones, SalarioNeto)
-                        VALUES (@idSemanaPlanilla, @idEmpleado, 0, 0, 0);
+                        INSERT INTO dbo.PlanillaSemXEmpleado (
+                            idSemanaPlanilla
+                            , idEmpleado
+                            , SalarioBruto
+                            , TotalDeducciones
+                            , SalarioNeto
+                            )
+                        VALUES (
+                            @idSemanaPlanilla
+                            , @idEmpleado
+                            , 0
+                            , 0
+                            , 0
+                            );
                         
                         SET @idPlanillaSemXEmpleado = SCOPE_IDENTITY();
                     END
                     
                     -- Insertar asistencia
-                    INSERT INTO Asistencia (idEmpleado, Fecha, HoraEntrada, HoraSalida, Procesado)
-                    VALUES (@idEmpleado, @inFecha, @horaEntrada, @horaSalida, 0);
+                    INSERT INTO dbo.Asistencia (
+                        idEmpleado
+                        , Fecha
+                        , HoraEntrada
+                        , HoraSalida
+                        , Procesado
+                        )
+                    VALUES (
+                        @idEmpleado
+                        , @inFecha
+                        , @horaEntrada
+                        , @horaSalida
+                        , 0
+                        );
                     
                     DECLARE @idAsistencia INT = SCOPE_IDENTITY();
                     
@@ -117,7 +142,7 @@ BEGIN
             SET @outResultado = COALESCE(ERROR_NUMBER(), 50004);
         
         DECLARE @errorDesc VARCHAR(200) = CONCAT('En la fecha: ',@inFecha,' ',ERROR_MESSAGE());
-        INSERT INTO DBError (
+        INSERT INTO dbo.DBError (
             idTipoError,
             Mensaje,
             Procedimiento,

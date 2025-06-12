@@ -72,7 +72,7 @@ BEGIN
             SET @outResultado = COALESCE(ERROR_NUMBER(), 50005);
         
         DECLARE @errorDesc VARCHAR(200) = CONCAT('En la fecha: ',@inFecha,' ',ERROR_MESSAGE());
-        INSERT INTO DBError (
+        INSERT INTO dbo.DBError (
             idTipoError,
             Mensaje,
             Procedimiento,

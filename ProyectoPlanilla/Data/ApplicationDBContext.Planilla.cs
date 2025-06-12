@@ -292,5 +292,41 @@ namespace ProyectoPlanilla.Data
 
             return detalleDeducciones;
         }
+        public async Task<int> ProcesarOperacionXMLAsync(string xmlOperacion)
+        {
+            int resultado = -1;
+            try
+            {
+                using (var command = Database.GetDbConnection().CreateCommand())
+                {
+                    command.CommandText = "sp_procesarOperacionXML";
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    command.CommandTimeout = 300;
+                    var paramXml = new SqlParameter("@inXmlOperacion", System.Data.SqlDbType.Xml)
+                    {
+                        Value = xmlOperacion
+                    };
+                    var paramOut = new SqlParameter("@outResultado", System.Data.SqlDbType.Int)
+                    {
+                        Direction = System.Data.ParameterDirection.Output
+                    };
+
+                    command.Parameters.Add(paramXml);
+                    command.Parameters.Add(paramOut);
+
+                    await Database.OpenConnectionAsync();
+                    await command.ExecuteNonQueryAsync();
+
+                    resultado = (int)(paramOut.Value ?? -1);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception or handle it as needed
+                Console.WriteLine($"Error al procesar la operación XML: {ex.Message}");
+                resultado = -9999;
+            }
+            return resultado;
+        }
     }
 }

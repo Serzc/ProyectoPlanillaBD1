@@ -120,5 +120,63 @@ namespace ProyectoPlanilla.Data
 
             return tipos;
         }
+        public async Task<int> EliminarTablasAsync()
+        {
+            int resultado = -1;
+            try
+            {
+                using (var command = Database.GetDbConnection().CreateCommand())
+                {
+                    command.CommandText = "sp_borrarTablas";
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    await Database.OpenConnectionAsync();
+                    await command.ExecuteNonQueryAsync();
+                    resultado = 0;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error al eliminar tablas: {e.Message}");
+                resultado = -9999;
+            }
+            return resultado;
+        }
+
+        public async Task<int> CargarCatalogoDesdeXMLAsync(string xmlCatalogo)
+        {
+            int resultado = -1;
+            try
+            {
+                using (var command = Database.GetDbConnection().CreateCommand())
+                {
+                    command.CommandText = "sp_CargarCatalogoDesdeXML";
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    var paramXml = new SqlParameter("@inXmlData", System.Data.SqlDbType.Xml)
+                    {
+                        Value = xmlCatalogo
+                    };
+                    var paramOut = new SqlParameter("@outResultado", System.Data.SqlDbType.Int)
+                    {
+                        Direction = System.Data.ParameterDirection.Output
+                    };
+
+                    command.Parameters.Add(paramXml);
+                    command.Parameters.Add(paramOut);
+
+                    await Database.OpenConnectionAsync();
+                    await command.ExecuteNonQueryAsync();
+
+                    resultado = (int)(paramOut.Value ?? -1);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error al cargar catálogo desde XML: {e.Message}");
+                resultado = -9999;
+            }
+            return resultado;
+        }
     }
 }

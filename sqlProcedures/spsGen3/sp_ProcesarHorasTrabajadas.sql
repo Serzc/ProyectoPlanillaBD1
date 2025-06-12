@@ -13,27 +13,27 @@ BEGIN
     BEGIN TRY
         -- Obtener información del empleado y su jornada
         DECLARE @idTipoJornada INT, @horaInicioJornada TIME, @horaFinJornada TIME;
-        DECLARE @salarioXHora DECIMAL(10,2);
+        DECLARE @salarioXHora DECIMAL(25,5);
         DECLARE @esFeriado BIT, @esDomingo BIT;
         
         -- 1. Obtener jornada actual del empleado
         SELECT 
-            @idTipoJornada = je.idTipoJornada,
-            @horaInicioJornada = tj.HoraInicio,
-            @horaFinJornada = tj.HoraFin
-        FROM JornadaEmpleado je
-        JOIN TipoJornada tj ON je.idTipoJornada = tj.id
-        WHERE je.idEmpleado = @inIdEmpleado
-          AND @inFecha BETWEEN je.FechaInicio AND je.FechaFin;
+            @idTipoJornada = JE.idTipoJornada,
+            @horaInicioJornada = TJ.HoraInicio,
+            @horaFinJornada = TJ.HoraFin
+        FROM dbo.JornadaEmpleado AS JE
+        JOIN dbo.TipoJornada AS TJ ON JE.idTipoJornada = TJ.id
+        WHERE JE.idEmpleado = @inIdEmpleado
+          AND @inFecha BETWEEN JE.FechaInicio AND JE.FechaFin;
         
         -- 2. Obtener salario por hora
-        SELECT @salarioXHora = p.SalarioXHora
-        FROM Empleado e
-        JOIN Puesto p ON e.idPuesto = p.id
-        WHERE e.id = @inIdEmpleado;
+        SELECT @salarioXHora = P.SalarioXHora
+        FROM dbo.Empleado AS E
+        JOIN dbo.Puesto AS P ON E.idPuesto = P.id
+        WHERE E.id = @inIdEmpleado;
         
         -- 3. Verificar si es feriado o domingo
-        SET @esFeriado = CASE WHEN EXISTS (SELECT 1 FROM Feriado WHERE Fecha = @inFecha) THEN 1 ELSE 0 END;
+        SET @esFeriado = CASE WHEN EXISTS (SELECT 1 FROM dbo.Feriado WHERE Fecha = @inFecha) THEN 1 ELSE 0 END;
         SET @esDomingo = CASE WHEN DATEPART(WEEKDAY, @inFecha) = 1 THEN 1 ELSE 0 END;
         
         -- 4. Calcular horas trabajadas
@@ -57,7 +57,7 @@ BEGIN
 
         -- Horas trabajadas totales (redondear hacia abajo a horas completas)
         DECLARE @horasTrabajadas DECIMAL(5,2) = FLOOR( @horaSalidaTime-@horaEntradaTime );
-		SElect @horasTrabajadas as trabajadas
+		
 
         -- Horas ordinarias son las trabajadas dentro del horario de jornada (hasta 8 horas)
         SET @horasOrdinarias = CASE 
@@ -98,7 +98,7 @@ BEGIN
                 -- Si la jornada cruza medianoche y el día siguiente es feriado/domingo, parte puede ser doble
                 IF @horaSalidaTime > 0 AND 
                 (DATEPART(WEEKDAY, @fechaDiaSiguiente) = 1 OR 
-                    EXISTS (SELECT 1 FROM Feriado WHERE Fecha = @fechaDiaSiguiente))
+                    EXISTS (SELECT 1 FROM dbo.Feriado WHERE Fecha = @fechaDiaSiguiente))
                 BEGIN
                     -- Calcular horas en el nuevo día (feriado/domingo)
                     DECLARE @horasNuevoDia DECIMAL(25,5) = FLOOR(DATEDIFF(MINUTE, CAST('00:00' AS TIME), 
@@ -127,7 +127,13 @@ BEGIN
         -- Movimiento por horas ordinarias
         IF @horasOrdinarias > 0
         BEGIN
-            INSERT INTO MovimientoPlanilla (idPlanillaSemXEmpleado, idTipoMovimiento, Fecha, Monto, Descripcion)
+            INSERT INTO dbo.MovimientoPlanilla (
+                idPlanillaSemXEmpleado
+                , idTipoMovimiento
+                , Fecha
+                , Monto
+                , Descripcion
+                )
             VALUES (
                 @inIdPlanillaSemXEmpleado,
                 1, -- Crédito Horas ordinarias
@@ -137,14 +143,28 @@ BEGIN
             );
             
             -- Relacionar con la asistencia
-            INSERT INTO MovimientoXHora (idMovimiento, idAsistencia, CantidadHoras)
-            VALUES (SCOPE_IDENTITY(), @inIdAsistencia, @horasOrdinarias);
+            INSERT INTO dbo.MovimientoXHora (
+                idMovimiento
+                , idAsistencia
+                , CantidadHoras
+                )
+            VALUES (
+                SCOPE_IDENTITY()
+                , @inIdAsistencia
+                , @horasOrdinarias
+                );
         END
         
         -- Movimiento por horas extras normales
         IF @horasExtrasNormales > 0 AND @esFeriado = 0 AND @esDomingo = 0
         BEGIN
-            INSERT INTO MovimientoPlanilla (idPlanillaSemXEmpleado, idTipoMovimiento, Fecha, Monto, Descripcion)
+            INSERT INTO dbo.MovimientoPlanilla (
+                idPlanillaSemXEmpleado
+                , idTipoMovimiento
+                , Fecha
+                , Monto
+                , Descripcion
+                )
             VALUES (
                 @inIdPlanillaSemXEmpleado,
                 2, -- Crédito Horas Extra Normales
@@ -153,14 +173,26 @@ BEGIN
                 CONCAT('Horas extras normales: ', @horasExtrasNormales)
             );
             
-            INSERT INTO MovimientoXHora (idMovimiento, idAsistencia, CantidadHoras)
-            VALUES (SCOPE_IDENTITY(), @inIdAsistencia, @horasExtrasNormales);
+            INSERT INTO dbo.MovimientoXHora (
+                idMovimiento
+                , idAsistencia
+                , CantidadHoras)
+            VALUES (
+                SCOPE_IDENTITY()
+                , @inIdAsistencia
+                , @horasExtrasNormales
+                );
         END
         
         -- Movimiento por horas extras dobles (domingo o feriado)
         IF @horasExtrasDobles > 0 AND (@esFeriado = 1 OR @esDomingo = 1)
         BEGIN
-            INSERT INTO MovimientoPlanilla (idPlanillaSemXEmpleado, idTipoMovimiento, Fecha, Monto, Descripcion)
+            INSERT INTO dbo.MovimientoPlanilla (
+                idPlanillaSemXEmpleado
+                , idTipoMovimiento
+                , Fecha
+                , Monto
+                , Descripcion)
             VALUES (
                 @inIdPlanillaSemXEmpleado,
                 3, -- Crédito Horas Extra Dobles
@@ -169,12 +201,20 @@ BEGIN
                 CONCAT('Horas extras dobles: ', @horasExtrasDobles)
             );
             
-            INSERT INTO MovimientoXHora (idMovimiento, idAsistencia, CantidadHoras)
-            VALUES (SCOPE_IDENTITY(), @inIdAsistencia, @horasExtrasDobles);
+            INSERT INTO dbo.MovimientoXHora (
+                idMovimiento
+                , idAsistencia
+                , CantidadHoras
+                )
+            VALUES (
+                SCOPE_IDENTITY()
+                , @inIdAsistencia
+                , @horasExtrasDobles
+                );
         END
         
         -- Actualizar salario bruto en la planilla semanal
-        UPDATE PlanillaSemXEmpleado
+        UPDATE dbo.PlanillaSemXEmpleado
         SET SalarioBruto = SalarioBruto + 
             (COALESCE(@horasOrdinarias, 0) * @salarioXHora +
             (COALESCE(@horasExtrasNormales, 0) * @salarioXHora * 1.5) +
@@ -182,7 +222,7 @@ BEGIN
         WHERE id = @inIdPlanillaSemXEmpleado;
         
         -- Marcar asistencia como procesada
-        UPDATE Asistencia
+        UPDATE dbo.Asistencia
         SET Procesado = 1
         WHERE id = @inIdAsistencia;
         
@@ -197,7 +237,7 @@ BEGIN
             SET @outResultado = COALESCE(ERROR_NUMBER(), 50021);
         
         DECLARE @errorDesc VARCHAR(200) = CONCAT('En la fecha: ',@inFecha,' ',ERROR_MESSAGE());
-        INSERT INTO DBError (
+        INSERT INTO dbo.DBError (
             idTipoError,
             Mensaje,
             Procedimiento,

@@ -26,16 +26,16 @@ BEGIN
         FROM @inXmlOperacion.nodes('//JornadasProximaSemana/TipoJornadaProximaSemana') as t(f);
         
         -- Actualizar o insertar jornadas
-        MERGE INTO JornadaEmpleado AS target
+        MERGE INTO dbo.JornadaEmpleado AS target
         USING (
             SELECT 
-                e.id AS idEmpleado,
-                jp.IdTipoJornada,
+                E.id AS idEmpleado,
+                JP.IdTipoJornada,
                 @fechaInicioSemana AS FechaInicio,
                 @fechaFinSemana AS FechaFin
-            FROM @jornadasProcesar jp
-            JOIN Empleado e ON jp.ValorTipoDocumento = e.ValorDocumentoIdentidad
-            WHERE e.Activo = 1
+            FROM @jornadasProcesar AS JP
+            JOIN dbo.Empleado AS E ON JP.ValorTipoDocumento = E.ValorDocumentoIdentidad
+            WHERE E.Activo = 1
         ) AS source
         ON target.idEmpleado = source.idEmpleado 
            AND target.FechaInicio = source.FechaInicio
@@ -44,8 +44,10 @@ BEGIN
                 idTipoJornada = source.IdTipoJornada,
                 FechaFin = source.FechaFin
         WHEN NOT MATCHED THEN
-            INSERT (idEmpleado, idTipoJornada, FechaInicio, FechaFin)
-            VALUES (source.idEmpleado, source.IdTipoJornada, source.FechaInicio, source.FechaFin);
+            INSERT (idEmpleado, idTipoJornada
+                    , FechaInicio, FechaFin)
+            VALUES (source.idEmpleado, source.IdTipoJornada
+                    , source.FechaInicio, source.FechaFin);
         
         COMMIT TRANSACTION;
         SET @outResultado = 0;
@@ -58,7 +60,7 @@ BEGIN
             SET @outResultado = COALESCE(ERROR_NUMBER(), 50001);
         
         DECLARE @errorDesc VARCHAR(200) = CONCAT('En la fecha: ',@inFecha,' ',ERROR_MESSAGE());
-        INSERT INTO DBError (
+        INSERT INTO dbo.DBError (
             idTipoError,
             Mensaje,
             Procedimiento,

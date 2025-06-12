@@ -13,6 +13,37 @@
 {
     <div class="alert alert-danger">@Model.MensajeError</div>
 }
+<!-- Campo y botón para cargar operación desde XML -->
+<form method="post">
+    <label for="XmlOperacion">Pega el XML de operación:</label>
+    <textarea id="XmlOperacion" name="XmlOperacion" rows="6" class="form-control">@Model.XmlOperacion</textarea>
+    <button type="submit" asp-page-handler="ProcesarPlanilla" class="btn btn-warning mt-2">Procesar Planilla</button>
+</form>
+
+@if (!string.IsNullOrEmpty(Model.MensajeProceso))
+{
+    <div class="alert alert-info">@Model.MensajeProceso</div>
+}
+<!-- Botón para eliminar todas las tablas -->
+<form method="post" asp-page-handler="EliminarTablas">
+    <button type="submit" class="btn btn-danger mt-2">Eliminar todas las tablas</button>
+</form>
+
+<!-- Campo y botón para cargar catálogo desde XML -->
+<form method="post" asp-page-handler="CargarCatalogo">
+    <label for="XmlCatalogo">Pega el XML del catálogo:</label>
+    <textarea id="XmlCatalogo" name="XmlCatalogo" rows="6" class="form-control">@Model.XmlCatalogo</textarea>
+    <button type="submit" class="btn btn-primary mt-2">Cargar Catálogo</button>
+</form>
+
+@if (!string.IsNullOrEmpty(Model.MensajeCatalogo))
+{
+    <div class="alert alert-info">@Model.MensajeCatalogo</div>
+}
+@if (!string.IsNullOrEmpty(Model.MensajeEliminacion))
+{
+    <div class="alert alert-warning">@Model.MensajeEliminacion</div>
+}
 
 <table class="table">
     <thead>

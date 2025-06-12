@@ -36,6 +36,12 @@ BEGIN
                 IF @resultadoParcial <> 0
                     SET @outResultado = @resultadoParcial;
             END
+            IF @xmlFecha.exist('//EliminarEmpleados') = 1
+            BEGIN
+                EXEC sp_ProcesarEliminarEmpleados @xmlFecha, @fechaActual, @outResultado = @resultadoParcial OUTPUT;
+                IF @resultadoParcial <> 0
+                    SET @outResultado = @resultadoParcial;
+            END
             
             IF @resultadoParcial = 0 AND @xmlFecha.exist('//MarcasAsistencia') = 1
             BEGIN
@@ -68,16 +74,19 @@ BEGIN
             -- Procesar cierres semanales/mensuales si es jueves
             IF @resultadoParcial = 0 AND @esJueves = 1
             BEGIN
-                EXEC sp_ProcesarCierreSemanal @fechaActual, @outResultado = @resultadoParcial OUTPUT;
-                IF @resultadoParcial <> 0
-                    SET @outResultado = @resultadoParcial;
-                    
-                -- Verificar si es el último jueves del mes para cierre mensual
-                IF @resultadoParcial = 0 AND dbo.EsUltimoJuevesDelMes(@fechaActual) = 1
-                BEGIN
-                    EXEC sp_ProcesarCierreMensual @fechaActual, @outResultado = @resultadoParcial OUTPUT;
+                IF @i <> 1 OR CAST(@fechaActual AS DATE) <> '2023-06-01'
+                BEGIN 
+                    EXEC sp_ProcesarCierreSemanal @fechaActual, @outResultado = @resultadoParcial OUTPUT;
                     IF @resultadoParcial <> 0
                         SET @outResultado = @resultadoParcial;
+                        
+                    -- Verificar si es el último jueves del mes para cierre mensual
+                    IF @resultadoParcial = 0 AND dbo.GetUltimoJuevesDelMes(@fechaActual) = @fechaActual
+                    BEGIN
+                        EXEC sp_ProcesarCierreMensual @fechaActual, @outResultado = @resultadoParcial OUTPUT;
+                        IF @resultadoParcial <> 0
+                            SET @outResultado = @resultadoParcial;
+                    END
                 END
                 IF @resultadoParcial = 0
                 BEGIN
@@ -101,7 +110,7 @@ BEGIN
             SET @outResultado = COALESCE(ERROR_NUMBER(), 50000);
         
         DECLARE @errorDesc VARCHAR(200) = CONCAT('En la fecha: ', @fechaActual, ' ', ERROR_MESSAGE());
-        INSERT INTO DBError (
+        INSERT INTO dbo.DBError (
             idTipoError,
             Mensaje,
             Procedimiento,

@@ -11,16 +11,18 @@ BEGIN
         DECLARE @fechaInicioMes DATE, @fechaFinMes DATE;
         DECLARE @semanasEnMes INT;
         
-        -- Obtener semana de planilla actual
+        
+
+        -- Obtener semana de planilla actual========================================
         SELECT TOP 1
-            @idSemanaPlanilla = sp.id,
-            @idMesPlanilla = sp.idMesPlanilla,
-            @fechaInicioSemana = sp.FechaInicio,
-            @fechaFinSemana = sp.FechaFin
-        FROM SemanaPlanilla sp
-        WHERE @inFecha BETWEEN sp.FechaInicio AND sp.FechaFin
-        AND sp.Cerrado = 0
-        ORDER BY sp.FechaInicio DESC;
+            @idSemanaPlanilla = SP.id,
+            @idMesPlanilla = SP.idMesPlanilla,
+            @fechaInicioSemana = SP.FechaInicio,
+            @fechaFinSemana = SP.FechaFin
+        FROM dbo.SemanaPlanilla AS SP
+        WHERE @inFecha BETWEEN SP.FechaInicio AND SP.FechaFin
+        AND SP.Cerrado = 0
+        ORDER BY SP.FechaInicio DESC;
         
         IF @idSemanaPlanilla IS NULL
         BEGIN
@@ -30,16 +32,16 @@ BEGIN
         
         -- Obtener información del mes
         SELECT 
-            @fechaInicioMes = mp.FechaInicio,
-            @fechaFinMes = mp.FechaFin
-        FROM MesPlanilla mp
-        WHERE mp.id = @idMesPlanilla;
+            @fechaInicioMes = MP.FechaInicio,
+            @fechaFinMes = MP.FechaFin
+        FROM dbo.MesPlanilla AS MP
+        WHERE MP.id = @idMesPlanilla;
         
         -- Calcular cuántas semanas hay en este mes (para deducciones fijas)
         SELECT @semanasEnMes = COUNT(*)
-        FROM SemanaPlanilla
+        FROM dbo.SemanaPlanilla
         WHERE idMesPlanilla = @idMesPlanilla;
-        
+        -- PROCESAR DEDUCCIONES ==================================================
         BEGIN TRANSACTION;
         
         -- Tabla variable para deducciones
@@ -51,69 +53,80 @@ BEGIN
         
         -- Procesar todos los empleados con planilla en esta semana
         -- Primero: Calcular todas las deducciones
-        INSERT INTO @deduccionesProcesar (idPlanillaSemXEmpleado, idTipoDeduccion, Monto)
+        INSERT INTO @deduccionesProcesar (
+            idPlanillaSemXEmpleado
+            , idTipoDeduccion
+            , Monto
+            )
         SELECT 
-            pse.id,
-            ed.idTipoDeduccion,
+            PSE.id,
+            ED.idTipoDeduccion,
             CASE 
-                WHEN td.Porcentual = 1 THEN pse.SalarioBruto * ed.ValorPorcentual
-                WHEN td.Porcentual = 0 THEN ed.ValorFijo / @semanasEnMes
+                WHEN TD.Porcentual = 1 THEN PSE.SalarioBruto * ED.ValorPorcentual
+                WHEN TD.Porcentual = 0 THEN ED.ValorFijo / @semanasEnMes
                 ELSE 0
             END AS Monto
-        FROM PlanillaSemXEmpleado pse
-        JOIN EmpleadoDeduccion ed ON pse.idEmpleado = ed.idEmpleado
-        JOIN TipoDeduccion td ON ed.idTipoDeduccion = td.id
-        WHERE pse.idSemanaPlanilla = @idSemanaPlanilla
-          AND ed.FechaDesasociacion IS NULL
-          AND (@inFecha >= ed.FechaAsociacion OR ed.FechaAsociacion IS NULL);
+        FROM dbo.PlanillaSemXEmpleado AS PSE
+        JOIN dbo.EmpleadoDeduccion AS ED ON PSE.idEmpleado = ED.idEmpleado
+        JOIN dbo.TipoDeduccion AS TD ON ED.idTipoDeduccion = TD.id
+        WHERE PSE.idSemanaPlanilla = @idSemanaPlanilla
+          AND ED.FechaDesasociacion IS NULL
+          AND (@inFecha >= ED.FechaAsociacion OR ED.FechaAsociacion IS NULL);
         
         -- Actualizar planillas semanales con total deducciones
-        UPDATE pse
+        UPDATE PSE
         SET 
-            pse.TotalDeducciones = dp.TotalDeducciones,
-            pse.SalarioNeto = pse.SalarioBruto - dp.TotalDeducciones
-        FROM PlanillaSemXEmpleado pse
+            PSE.TotalDeducciones = DP.TotalDeducciones,
+            PSE.SalarioNeto = PSE.SalarioBruto - DP.TotalDeducciones
+        FROM dbo.PlanillaSemXEmpleado AS PSE
         JOIN (
             SELECT idPlanillaSemXEmpleado, SUM(Monto) AS TotalDeducciones
             FROM @deduccionesProcesar
             GROUP BY idPlanillaSemXEmpleado
-        ) dp ON pse.id = dp.idPlanillaSemXEmpleado;
+        ) DP ON PSE.id = DP.idPlanillaSemXEmpleado;
         
         -- Registrar movimientos de deducción
-        INSERT INTO MovimientoPlanilla (idPlanillaSemXEmpleado, idTipoMovimiento, Fecha, Monto, Descripcion)
+        INSERT INTO dbo.MovimientoPlanilla (
+            idPlanillaSemXEmpleado
+            , idTipoMovimiento
+            , Fecha
+            , Monto
+            , Descripcion
+            )
         SELECT 
-            dp.idPlanillaSemXEmpleado,
+            DP.idPlanillaSemXEmpleado,
             CASE 
-                WHEN td.Obligatorio = 1 THEN 4 -- Débito Deducciones de Ley
+                WHEN TD.Obligatorio = 1 THEN 4 -- Débito Deducciones de Ley
                 ELSE 5 -- Débito Deducción No Obligatoria
             END,
             @inFecha,
-            dp.Monto,
-            td.Nombre
-        FROM @deduccionesProcesar dp
-        JOIN TipoDeduccion td ON dp.idTipoDeduccion = td.id;
+            DP.Monto,
+            TD.Nombre
+        FROM @deduccionesProcesar DP
+        JOIN dbo.TipoDeduccion TD ON DP.idTipoDeduccion = TD.id;
         
         -- Actualizar planillas mensuales
-        UPDATE pme
+        UPDATE PME
         SET 
-            pme.SalarioBruto = pme.SalarioBruto + pse.SalarioBruto,
-            pme.TotalDeducciones = pme.TotalDeducciones + pse.TotalDeducciones,
-            pme.SalarioNeto = pme.SalarioNeto + pse.SalarioNeto
-        FROM PlanillaMexXEmpleado pme
-        JOIN PlanillaSemXEmpleado pse ON pme.idEmpleado = pse.idEmpleado
-        WHERE pse.idSemanaPlanilla = @idSemanaPlanilla
-          AND pme.idMesPlanilla = @idMesPlanilla;
+            PME.SalarioBruto = PME.SalarioBruto + PSE.SalarioBruto,
+            PME.TotalDeducciones = PME.TotalDeducciones + PSE.TotalDeducciones,
+            PME.SalarioNeto = PME.SalarioNeto + PSE.SalarioNeto
+        FROM dbo.PlanillaMexXEmpleado AS PME
+        JOIN dbo.PlanillaSemXEmpleado AS PSE ON PME.idEmpleado = PSE.idEmpleado
+        WHERE PSE.idSemanaPlanilla = @idSemanaPlanilla
+          AND PME.idMesPlanilla = @idMesPlanilla;
         
         -- Actualizar deducciones por mes
-        MERGE INTO DeduccionesXEmpleadoxMes AS target
+        MERGE INTO dbo.DeduccionesXEmpleadoxMes AS target
         USING (
             SELECT 
-                pme.id AS idPlanillaMexXEmpleado,
-                dp.idTipoDeduccion,
-                dp.Monto
-            FROM @deduccionesProcesar dp
-            JOIN PlanillaSemXEmpleado pse ON dp.idPlanillaSemXEmpleado = pse.id
-            JOIN PlanillaMexXEmpleado pme ON pse.idEmpleado = pme.idEmpleado AND pme.idMesPlanilla = @idMesPlanilla
+                PME.id AS idPlanillaMexXEmpleado,
+                DP.idTipoDeduccion,
+                DP.Monto
+            FROM @deduccionesProcesar AS DP
+            JOIN PlanillaSemXEmpleado AS PSE ON DP.idPlanillaSemXEmpleado = PSE.id
+            JOIN PlanillaMexXEmpleado AS PME ON PSE.idEmpleado = PME.idEmpleado 
+                                                AND PME.idMesPlanilla = @idMesPlanilla
         ) AS source
         ON target.idPlanillaMexXEmpleado = source.idPlanillaMexXEmpleado
            AND target.idTipoDeduccion = source.idTipoDeduccion
@@ -124,7 +137,7 @@ BEGIN
             VALUES (source.idPlanillaMexXEmpleado, source.idTipoDeduccion, source.Monto);
         
         -- Marcar semana como cerrada
-        UPDATE SemanaPlanilla
+        UPDATE dbo.SemanaPlanilla
         SET Cerrado = 1
         WHERE id = @idSemanaPlanilla;
         
@@ -138,7 +151,7 @@ BEGIN
             SET @outResultado = COALESCE(ERROR_NUMBER(), 50016);
         
         DECLARE @errorDesc VARCHAR(200) = CONCAT('En la fecha: ',@inFecha,' ',ERROR_MESSAGE());
-        INSERT INTO DBError (
+        INSERT INTO dbo.DBError (
             idTipoError,
             Mensaje,
             Procedimiento,

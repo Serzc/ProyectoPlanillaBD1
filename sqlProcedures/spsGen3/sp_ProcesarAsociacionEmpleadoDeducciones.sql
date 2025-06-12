@@ -44,7 +44,7 @@ BEGIN
             DECLARE @idEmpleado INT;
             
             SELECT @idEmpleado = id 
-            FROM Empleado 
+            FROM dbo.Empleado 
             WHERE ValorDocumentoIdentidad = @valorDoc AND Activo = 1;
             
             IF @idEmpleado IS NULL
@@ -58,7 +58,7 @@ BEGIN
                 DECLARE @esObligatoria BIT;
                 
                 SELECT @esObligatoria = Obligatorio
-                FROM TipoDeduccion
+                FROM dbo.TipoDeduccion
                 WHERE id = @idTipoDeduccion;
                 
                 IF @esObligatoria = 1
@@ -72,22 +72,26 @@ BEGIN
                     -- Verificar si ya existe una asociación activa
                     IF EXISTS (
                         SELECT 1 
-                        FROM EmpleadoDeduccion 
+                        FROM dbo.EmpleadoDeduccion 
                         WHERE idEmpleado = @idEmpleado 
                           AND idTipoDeduccion = @idTipoDeduccion
                           AND FechaDesasociacion IS NULL
                     )
                     BEGIN
                         -- Actualizar asociación existente
-                        UPDATE EmpleadoDeduccion
+                        UPDATE dbo.EmpleadoDeduccion
                         SET 
                             ValorFijo = CASE 
-                                WHEN (SELECT Porcentual FROM TipoDeduccion WHERE id = @idTipoDeduccion) = 0 
+                                WHEN (SELECT Porcentual 
+                                        FROM dbo.TipoDeduccion 
+                                        WHERE id = @idTipoDeduccion) = 0 
                                 THEN @monto 
                                 ELSE NULL 
                             END,
                             ValorPorcentual = CASE 
-                                WHEN (SELECT Porcentual FROM TipoDeduccion WHERE id = @idTipoDeduccion) = 1 
+                                WHEN (SELECT Porcentual 
+                                        FROM dbo.TipoDeduccion 
+                                        WHERE id = @idTipoDeduccion) = 1 
                                 THEN @monto 
                                 ELSE NULL 
                             END
@@ -98,7 +102,7 @@ BEGIN
                     ELSE
                     BEGIN
                         -- Insertar nueva asociación
-                        INSERT INTO EmpleadoDeduccion (
+                        INSERT INTO dbo.EmpleadoDeduccion (
                             idEmpleado,
                             idTipoDeduccion,
                             ValorPorcentual,
@@ -108,11 +112,11 @@ BEGIN
                         SELECT 
                             @idEmpleado,
                             @idTipoDeduccion,
-                            CASE WHEN td.Porcentual = 1 THEN @monto ELSE NULL END,
-                            CASE WHEN td.Porcentual = 0 THEN @monto ELSE NULL END,
+                            CASE WHEN TD.Porcentual = 1 THEN @monto ELSE NULL END,
+                            CASE WHEN TD.Porcentual = 0 THEN @monto ELSE NULL END,
                             @inFecha
-                        FROM TipoDeduccion td
-                        WHERE td.id = @idTipoDeduccion;
+                        FROM dbo.TipoDeduccion TD
+                        WHERE TD.id = @idTipoDeduccion;
                     END
                 END
             END
@@ -134,7 +138,7 @@ BEGIN
             SET @outResultado = COALESCE(ERROR_NUMBER(), 50010);
         
         DECLARE @errorDesc VARCHAR(200) = CONCAT('En la fecha: ',@inFecha,' ',ERROR_MESSAGE());
-        INSERT INTO DBError (
+        INSERT INTO dbo.DBError (
             idTipoError,
             Mensaje,
             Procedimiento,

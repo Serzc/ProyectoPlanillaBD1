@@ -24,10 +24,11 @@ BEGIN
         
         -- Buscar mes existente para este periodo
         SELECT @idMesPlanilla = id
-        FROM MesPlanilla
+        FROM dbo.MesPlanilla
         WHERE Mes = @mesNatural 
           AND Anio = @anioNatural
-          AND Cerrado = 0;
+          AND FechaFin > DATEADD(DAY, 1,@inFechaJueves);
+          --AND Cerrado = 0;
         
         -- Si no existe mes, crear uno nuevo
         IF @idMesPlanilla IS NULL
@@ -37,16 +38,21 @@ BEGIN
             DECLARE @primerJueves DATE = DATEADD(DAY, (5 - DATEPART(WEEKDAY, @primerDiaMes) + 7) % 7, @primerDiaMes);
             
             -- Calcular el último jueves del mes natural
-            DECLARE @ultimoDiaMes DATE = EOMONTH(@primerDiaMes);
-            DECLARE @ultimoJueves DATE = DATEADD(DAY, -((DATEPART(WEEKDAY, @ultimoDiaMes) + 1) % 7), @ultimoDiaMes);
+            DECLARE @ultimoJueves DATE = dbo.GetUltimoJuevesDelMes(@primerDiaMes);
             
             -- Insertar nuevo mes con el rango completo desde el primer viernes hasta el último jueves
-            INSERT INTO MesPlanilla (Anio, Mes, FechaInicio, FechaFin, Cerrado)
+            INSERT INTO dbo.MesPlanilla (
+                Anio
+                , Mes
+                , FechaInicio
+                , FechaFin
+                , Cerrado
+                )
             VALUES (
-                @anioNatural,
-                @mesNatural,
-                DATEADD(DAY, 1, @primerJueves), -- Primer viernes
-                @ultimoJueves, -- Último jueves
+                DATEPART(YEAR, dbo.GetUltimoJuevesDelMes(@fechaFinSemana)),
+                DATEPART(MONTH, dbo.GetUltimoJuevesDelMes(@fechaFinSemana)),
+                @fechaInicioSemana,
+                dbo.GetUltimoJuevesDelMes(@fechaFinSemana),
                 0
             );
             
@@ -56,7 +62,7 @@ BEGIN
         
         -- Verificar que la semana no exista ya
         IF EXISTS (
-            SELECT 1 FROM SemanaPlanilla 
+            SELECT 1 FROM dbo.SemanaPlanilla 
             WHERE FechaInicio = @fechaInicioSemana 
               AND FechaFin = @fechaFinSemana
         )
@@ -72,11 +78,11 @@ BEGIN
             SET @semanaNum = 1;
         ELSE
             SELECT @semanaNum = COUNT(*) + 1
-            FROM SemanaPlanilla
+            FROM dbo.SemanaPlanilla
             WHERE idMesPlanilla = @idMesPlanilla;
         
         -- Insertar la nueva semana
-        INSERT INTO SemanaPlanilla (
+        INSERT INTO dbo.SemanaPlanilla (
             idMesPlanilla,
             Semana,
             FechaInicio,
@@ -94,39 +100,55 @@ BEGIN
         DECLARE @idSemanaPlanilla INT = SCOPE_IDENTITY();
         
         -- Crear registros de planilla para todos los empleados activos
-        INSERT INTO PlanillaSemXEmpleado (idSemanaPlanilla, idEmpleado, SalarioBruto, TotalDeducciones, SalarioNeto)
+        INSERT INTO dbo.PlanillaSemXEmpleado (
+            idSemanaPlanilla
+            , idEmpleado
+            , SalarioBruto
+            , TotalDeducciones
+            , SalarioNeto
+            )
         SELECT 
             @idSemanaPlanilla,
             id,
             0,
             0,
             0
-        FROM Empleado
+        FROM dbo.Empleado
         WHERE Activo = 1;
         
         -- Si es nuevo mes, crear también registros mensuales
         IF @esNuevoMes = 1
         BEGIN
-            INSERT INTO PlanillaMexXEmpleado (idMesPlanilla, idEmpleado, SalarioBruto, TotalDeducciones, SalarioNeto)
+            INSERT INTO dbo.PlanillaMexXEmpleado (
+                idMesPlanilla
+                , idEmpleado
+                , SalarioBruto
+                , TotalDeducciones
+                , SalarioNeto
+                )
             SELECT 
                 @idMesPlanilla,
                 id,
                 0,
                 0,
                 0
-            FROM Empleado
+            FROM dbo.Empleado
             WHERE Activo = 1;
             
             -- Crear registros de deducciones por mes para cada empleado
-            INSERT INTO DeduccionesXEmpleadoxMes (idPlanillaMexXEmpleado, idTipoDeduccion, Monto)
+            INSERT INTO dbo.DeduccionesXEmpleadoxMes (
+                idPlanillaMexXEmpleado
+                , idTipoDeduccion
+                , Monto
+                )
             SELECT 
-                pme.id,
-                ed.idTipoDeduccion,
+                PME.id,
+                ED.idTipoDeduccion,
                 0
-            FROM PlanillaMexXEmpleado pme
-            JOIN EmpleadoDeduccion ed ON pme.idEmpleado = ed.idEmpleado
-            WHERE pme.idMesPlanilla = @idMesPlanilla
-              AND ed.FechaDesasociacion IS NULL;
+            FROM dbo.PlanillaMexXEmpleado AS PME
+            JOIN dbo.EmpleadoDeduccion AS ED ON PME.idEmpleado = ED.idEmpleado
+            WHERE PME.idMesPlanilla = @idMesPlanilla
+              AND ED.FechaDesasociacion IS NULL;
         END
         
         SET @outResultado = 0;
@@ -138,7 +160,7 @@ BEGIN
         DECLARE @errorDesc VARCHAR(200) = CONCAT('En la fecha: ', @inFechaJueves, ' - ', ERROR_MESSAGE());
         DECLARE @errorLine INT = ERROR_LINE();
         
-        INSERT INTO DBError (
+        INSERT INTO dbo.DBError (
             idTipoError,
             Mensaje,
             Procedimiento,

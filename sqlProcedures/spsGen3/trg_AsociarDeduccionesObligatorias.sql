@@ -7,7 +7,7 @@ BEGIN
     
     BEGIN TRY
         -- Insertar deducciones obligatorias para cada nuevo empleado
-        INSERT INTO EmpleadoDeduccion (
+        INSERT INTO dbo.EmpleadoDeduccion (
             idEmpleado,
             idTipoDeduccion,
             ValorPorcentual,
@@ -15,19 +15,17 @@ BEGIN
             FechaAsociacion
         )
         SELECT 
-            i.id,
-            td.id,
-            CASE WHEN td.Porcentual = 1 THEN td.Valor ELSE NULL END,
-            CASE WHEN td.Porcentual = 0 THEN td.Valor ELSE NULL END,
+            I.id,
+            TD.id,
+            CASE WHEN TD.Porcentual = 1 THEN TD.Valor ELSE NULL END,
+            CASE WHEN TD.Porcentual = 0 THEN TD.Valor ELSE NULL END,
             GETDATE()
         FROM inserted i
-        CROSS JOIN TipoDeduccion td
-        WHERE td.Obligatorio = 1;
+        CROSS JOIN TipoDeduccion AS TD
+        WHERE TD.Obligatorio = 1;
     END TRY
     BEGIN CATCH
-        -- Registrar error pero no detener la operación
-
-        INSERT INTO DBError (
+        INSERT INTO dbo.DBError (
             idTipoError,
             Mensaje,
             Procedimiento,

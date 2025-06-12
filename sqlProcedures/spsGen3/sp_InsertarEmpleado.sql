@@ -16,7 +16,7 @@ BEGIN
         
         -- Obtener el ID del puesto por nombre
         SELECT @idPuesto = id 
-        FROM Puesto 
+        FROM dbo.Puesto 
         WHERE Nombre = @inNombrePuesto;
         
         IF @idPuesto IS NULL
@@ -29,7 +29,7 @@ BEGIN
         BEGIN TRANSACTION;
         
         -- Insertar empleado
-        INSERT INTO Empleado (
+        INSERT INTO dbo.Empleado (
             Nombre, 
             idTipoDocumento, 
             ValorDocumentoIdentidad, 
@@ -53,7 +53,7 @@ BEGIN
         DECLARE @idEmpleado INT = SCOPE_IDENTITY();
         
         -- Crear usuario asociado
-        INSERT INTO Usuario (
+        INSERT INTO dbo.Usuario (
             Username,
             Password,
             Tipo,
@@ -77,7 +77,7 @@ BEGIN
         
         DECLARE @errorDesc VARCHAR(200) = ERROR_MESSAGE();
         DECLARE @errorLine INT = ERROR_LINE();
-        INSERT INTO DBError (
+        INSERT INTO dbo.DBError (
             idTipoError,
             Mensaje,
             Procedimiento,

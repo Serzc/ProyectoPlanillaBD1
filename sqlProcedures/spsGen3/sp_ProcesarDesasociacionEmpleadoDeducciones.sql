@@ -41,7 +41,7 @@ BEGIN
             DECLARE @idEmpleado INT;
             
             SELECT @idEmpleado = id 
-            FROM Empleado 
+            FROM dbo.Empleado 
             WHERE ValorDocumentoIdentidad = @valorDoc AND Activo = 1;
             
             IF @idEmpleado IS NULL
@@ -55,7 +55,7 @@ BEGIN
                 DECLARE @esObligatoria BIT;
                 
                 SELECT @esObligatoria = Obligatorio
-                FROM TipoDeduccion
+                FROM dbo.TipoDeduccion
                 WHERE id = @idTipoDeduccion;
                 
                 IF @esObligatoria = 1
@@ -68,7 +68,7 @@ BEGIN
                     -- Verificar si existe una asociación activa
                     IF NOT EXISTS (
                         SELECT 1 
-                        FROM EmpleadoDeduccion 
+                        FROM dbo.EmpleadoDeduccion 
                         WHERE idEmpleado = @idEmpleado 
                           AND idTipoDeduccion = @idTipoDeduccion
                           AND FechaDesasociacion IS NULL
@@ -80,7 +80,7 @@ BEGIN
                     ELSE
                     BEGIN
                         -- Desasociar (marcar con fecha de desasociación)
-                        UPDATE EmpleadoDeduccion
+                        UPDATE dbo.EmpleadoDeduccion
                         SET FechaDesasociacion = @inFecha
                         WHERE idEmpleado = @idEmpleado
                           AND idTipoDeduccion = @idTipoDeduccion
@@ -107,7 +107,7 @@ BEGIN
             SET @outResultado = COALESCE(ERROR_NUMBER(), 50014);
         
         DECLARE @errorDesc VARCHAR(200) = CONCAT('En la fecha: ',@inFecha,' ',ERROR_MESSAGE());
-        INSERT INTO DBError (
+        INSERT INTO dbo.DBError (
             idTipoError,
             Mensaje,
             Procedimiento,

@@ -37,3 +37,7 @@ Flujo:
         PRINT 'Error durante el procesamiento: ' + CAST(@resultado AS VARCHAR);
     ELSE
         PRINT 'Procesamiento completado con éxito';
+
+
+TODO: se debe poder ver el detalle de cada movimiento o qué lo originó.
+TODO: ERROR: procedimiento bien hasta 06-28, luego el 06-29 abre la semana 5 vinculada a mes 1, el 29 no debería abrir esta semana, debería abrirla el 06-30
