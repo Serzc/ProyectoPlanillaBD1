@@ -49,8 +49,34 @@ BEGIN
             VALUES (source.idEmpleado, source.IdTipoJornada
                     , source.FechaInicio, source.FechaFin);
         
+
         COMMIT TRANSACTION;
         SET @outResultado = 0;
+
+        DECLARE @idTipoEvento INT;
+        SELECT @idTipoEvento = id FROM dbo.TipoEvento WHERE Nombre = 'Ingreso nuevas jornadas';
+        INSERT INTO dbo.EventLog (
+            FechaHora,
+            idUsuario,
+            idTipoEvento,
+            Parametros
+        )
+        SELECT
+            @inFecha,
+            (SELECT id FROM dbo.Usuario WHERE Tipo = 3),
+            @idTipoEvento,
+            JSON_QUERY(CONCAT(
+                        '{',
+                            '"idEmpleado":"', E.id,
+                            '",',
+                            '"idTipoJornada":"', JP.IdTipoJornada,
+                        '"}'
+                    ))
+        FROM @jornadasProcesar AS JP
+        JOIN dbo.Empleado AS E ON JP.ValorTipoDocumento = E.ValorDocumentoIdentidad
+        WHERE E.Activo = 1;
+        
+        RETURN @outResultado;
     END TRY
     BEGIN CATCH
         IF @@TRANCOUNT > 0

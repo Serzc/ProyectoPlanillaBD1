@@ -30,6 +30,7 @@ BEGIN
         DELETE FROM dbo.TipoJornada;
         DELETE FROM dbo.TipoDocumentoIdentidad;
 
+        DBCC CHECKIDENT ('Puesto', RESEED, 0);
         DBCC CHECKIDENT ('Usuario', RESEED, 0);
         DBCC CHECKIDENT ('Empleado', RESEED, 0);
         DBCC CHECKIDENT ('EmpleadoDeduccion', RESEED, 0);

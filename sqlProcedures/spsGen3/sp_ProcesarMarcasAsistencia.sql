@@ -128,7 +128,33 @@ BEGIN
                 COMMIT TRANSACTION;
             ELSE
                 ROLLBACK TRANSACTION;
-                
+            IF @resultadoParcial = 0
+            BEGIN 
+                DECLARE @idTipoEvento INT;
+                SELECT @idTipoEvento = id FROM dbo.TipoEvento WHERE Nombre = 'Ingreso de marcas de asistencia';
+
+                INSERT INTO dbo.EventLog (
+                    FechaHora,
+                    idUsuario,
+                    idTipoEvento,
+                    Parametros
+                )
+                VALUES (
+                    @inFecha,
+                    (SELECT id FROM dbo.Usuario WHERE Tipo = 3),
+                    @idTipoEvento,
+                    JSON_QUERY(CONCAT(
+                        '{',
+                            '"idEmpleado":"', COALESCE(CAST(@idEmpleado AS VARCHAR), 'null'), '",',
+                            '"SemanaPlanilla":"', @idSemanaPlanilla, '",',
+                            '"SemPlanillaXEmpleado":"', @idPlanillaSemXEmpleado, '",',
+                            '"HoraEntrada":"', FORMAT(@horaEntrada, 'HH:mm:ss'), '",',
+                            '"HoraSalida":"', FORMAT(@horaSalida, 'HH:mm:ss'), '",',
+                            '"Fecha":"', FORMAT(@inFecha, 'yyyy-MM-dd'), '"',
+                        '}'
+                    ))
+                );
+            END    
             SET @i = @i + 1;
         END
         

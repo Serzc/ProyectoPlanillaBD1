@@ -52,6 +52,9 @@ BEGIN
             FROM @nuevosEmpleados
             WHERE RowNum = @i;
             
+            DECLARE @usuarioSistemaId INT;
+            SELECT TOP 1 @usuarioSistemaId = id FROM dbo.Usuario WHERE Tipo = 3; -- Usuario del sistema
+
             EXEC sp_InsertarEmpleado 
                 @nombre, 
                 @idTipoDoc, 
@@ -60,6 +63,8 @@ BEGIN
                 @nombrePuesto, 
                 @usuario, 
                 @password,
+                @inFecha,
+                @usuarioSistemaId, 
                 @outResultado = @resultadoParcial OUTPUT;
                 
             SET @i = @i + 1;

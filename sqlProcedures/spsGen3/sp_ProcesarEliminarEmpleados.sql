@@ -26,14 +26,46 @@ BEGIN
         -- Procesar cada empleado
         WHILE @i <= @total AND @resultadoParcial = 0
         BEGIN
+            DECLARE @idEmpleado INT;
+            SELECT @idEmpleado = id
+                FROM dbo.Empleado 
+                WHERE ValorDocumentoIdentidad = (
+                    SELECT ValorTipoDocumento 
+                    FROM @EmpleadosEliminar 
+                    WHERE RowNum = @i
+                ) AND Activo = 1;
             UPDATE dbo.Empleado
             SET Activo = 0
             WHERE ValorDocumentoIdentidad = (
-                SELECT ValorTipoDocumento 
-                FROM @EmpleadosEliminar 
-                WHERE RowNum = @i
+            SELECT ValorTipoDocumento 
+            FROM @EmpleadosEliminar 
+            WHERE RowNum = @i
             );
             SET @i = @i + 1;
+            IF @resultadoParcial = 0
+            BEGIN
+                DECLARE @idTipoEvento INT;
+                SELECT @idTipoEvento = id FROM dbo.TipoEvento WHERE Nombre = 'Eliminar empleado';
+
+                INSERT INTO dbo.EventLog (
+                    FechaHora,
+                    idUsuario,
+                    idTipoEvento,
+                    Parametros
+                )
+                VALUES (
+                    @inFecha,
+                    (SELECT id FROM dbo.Usuario WHERE Tipo = 3),
+                    @idTipoEvento,
+                    JSON_QUERY(CONCAT(
+                        '{',
+                            '"idEmpleado":"', COALESCE(CAST(@idEmpleado AS VARCHAR), 'null'), '",',
+                            
+                            '"Fecha":"', FORMAT(@inFecha, 'yyyy-MM-dd'), '"',
+                        '}'
+                    ))
+                );
+            END
         END
         
         SET @outResultado = @resultadoParcial;
