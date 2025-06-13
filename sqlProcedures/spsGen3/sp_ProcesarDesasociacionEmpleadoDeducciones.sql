@@ -93,7 +93,46 @@ BEGIN
                 COMMIT TRANSACTION;
             ELSE
                 ROLLBACK TRANSACTION;
-                
+            IF @resultadoParcial = 0
+            BEGIN
+                DECLARE @idTipoEvento INT;
+                SELECT @idTipoEvento = id FROM dbo.TipoEvento WHERE Nombre = 'Desasociar deducción';
+
+                INSERT INTO dbo.EventLog (
+                    FechaHora,
+                    idUsuario,
+                    idTipoEvento,
+                    Parametros
+                )
+                VALUES (
+                    @inFecha,
+                    (SELECT id FROM dbo.Usuario WHERE Tipo = 3),
+                    @idTipoEvento,
+                    JSON_QUERY(CONCAT(
+                        '{',
+                            '"idEmpleado":"', COALESCE(CAST(@idEmpleado AS VARCHAR), 'null'), '",',
+                            '"idDeduccion":"', COALESCE(CAST(@idTipoDeduccion AS VARCHAR), 'null'), '",',
+                            '"ValorFijo":"', 
+                                (SELECT TOP 1 
+                                    CASE WHEN ValorFijo IS NULL THEN 'null' ELSE CAST(ValorFijo AS VARCHAR) END 
+                                FROM dbo.EmpleadoDeduccion 
+                                WHERE idEmpleado = @idEmpleado 
+                                AND idTipoDeduccion = @idTipoDeduccion 
+                                AND FechaDesasociacion IS NULL
+                                ORDER BY FechaAsociacion DESC), '",',
+                            '"ValorPorcentual":"', 
+                                (SELECT TOP 1 
+                                    CASE WHEN ValorPorcentual IS NULL THEN 'null' ELSE CAST(ValorPorcentual AS VARCHAR) END 
+                                FROM dbo.EmpleadoDeduccion 
+                                WHERE idEmpleado = @idEmpleado 
+                                AND idTipoDeduccion = @idTipoDeduccion 
+                                AND FechaDesasociacion IS NULL
+                                ORDER BY FechaAsociacion DESC), '",',
+                            '"FechaDeasociacion":"', FORMAT(@inFecha, 'yyyy-MM-dd'), '"',
+                        '}'
+                    ))
+                );
+            END
             SET @i = @i + 1;
         END
         
