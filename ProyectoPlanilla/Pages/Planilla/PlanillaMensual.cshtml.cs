@@ -21,11 +21,24 @@ namespace ProyectoPlanilla.Pages.Planilla
         [BindProperty(SupportsGet = true)]
         public int? IdPlanillaSeleccionada { get; set; }
 
-        public async Task OnGetAsync(int idEmpleado)
+        public async Task OnGetAsync(int? idEmpleado)
         {
             try
             {
-                Planillas = await _context.GetPlanillasMensuales(idEmpleado, 12);
+                if (idEmpleado == null || idEmpleado == 0)
+                {
+                    idEmpleado = HttpContext.Session.GetInt32("idEmpleado");
+                }
+
+                if (idEmpleado == null || idEmpleado == 0)
+                {
+                    ModelState.AddModelError("", "No se encontró el ID del empleado en sesión ni en la URL.");
+                    return;
+                }
+
+                Console.WriteLine($"PlanillaMensualModel OnGetAsync called with idEmpleado: {idEmpleado}");
+
+                Planillas = await _context.GetPlanillasMensuales(idEmpleado.Value, 12);
 
                 if (IdPlanillaSeleccionada.HasValue)
                 {
@@ -38,8 +51,8 @@ namespace ProyectoPlanilla.Pages.Planilla
                 Planillas = new List<PlanillaMensual>();
                 DetalleDeducciones = new List<DetalleDeduccion>();
             }
-            
         }
+
     }
 
     

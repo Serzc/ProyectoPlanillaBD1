@@ -1,54 +1,73 @@
-﻿@* PlanillaMensual.cshtml *@
-@page
+﻿@page
 @model ProyectoPlanilla.Pages.Planilla.PlanillaMensualModel
+@{
+    ViewData["Title"] = "Planilla Mensual";
+    var isAdmin = HttpContext.Session.GetInt32("tipoUsuario") == 1;
+    var idEmpleado = HttpContext.Session.GetInt32("idEmpleado") ?? 0;
 
-<h2>Planillas Mensuales</h2>
+}
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Periodo</th>
-            <th>Salario Bruto</th>
-            <th>Deducciones</th>
-            <th>Salario Neto</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var planilla in Model.Planillas)
+<h2>Planilla Mensual</h2>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        @if (isAdmin)
         {
-            <tr>
-                <td>@planilla.FechaInicio.ToString("MMM yyyy")</td>
-                <td>@planilla.SalarioBruto.ToString("C")</td>
-                <td>
-                    <a asp-page="./PlanillaMensual" asp-route-idEmpleado="@ViewData["IdEmpleado"]" 
-                       asp-route-IdPlanillaSeleccionada="@planilla.id">
-                        @planilla.TotalDeducciones.ToString("C")
-                    </a>
-                </td>
-                <td>@planilla.SalarioNeto.ToString("C")</td>
-            </tr>
+            <a asp-page="/Empleados/Index" class="btn btn-secondary">Lista empleados</a>
         }
-    </tbody>
-</table>
+    </div>
+    <div>
+        <a asp-page="/Planilla/PlanillaSemanal" asp-route-idEmpleado="@idEmpleado" class="btn btn-outline-primary">Ver semanal</a>
+    </div>
+</div>
 
-@if (Model.IdPlanillaSeleccionada.HasValue && Model.DetalleDeducciones.Any())
+@if (Model.Planillas.Any())
 {
-    <h3>Detalle de Deducciones</h3>
     <table class="table">
         <thead>
             <tr>
-                <th>Deducción</th>
+                <th>Mes</th>
+                <th>Bruto</th>
+                <th>Deducciones</th>
+                <th>Neto</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in Model.Planillas)
+            {
+                <tr>
+                    <td>@p.FechaInicio.ToString("MMMM yyyy")</td>
+                    <td>@p.SalarioBruto</td>
+                    <td>
+                        <a asp-page="./PlanillaMensual" asp-route-idEmpleado="@idEmpleado" asp-route-IdPlanillaSeleccionada="@p.id">
+                            @p.TotalDeducciones
+                        </a>
+                    </td>
+                    <td>@p.SalarioNeto</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (Model.IdPlanillaSeleccionada.HasValue)
+{
+    <h3>Detalle de deducciones</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
                 <th>Porcentaje</th>
                 <th>Monto</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var deduccion in Model.DetalleDeducciones)
+            @foreach (var d in Model.DetalleDeducciones)
             {
                 <tr>
-                    <td>@deduccion.Nombre</td>
-                    <td>@(deduccion.Porcentaje?.ToString("P") ?? "Fijo")</td>
-                    <td>@deduccion.Monto.ToString("C")</td>
+                    <td>@d.Nombre</td>
+                    <td>@(d.Porcentaje?.ToString("P") ?? "-")</td>
+                    <td>@d.Monto</td>
                 </tr>
             }
         </tbody>

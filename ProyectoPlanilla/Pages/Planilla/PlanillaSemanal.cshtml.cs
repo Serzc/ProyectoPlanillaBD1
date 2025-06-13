@@ -25,13 +25,24 @@ namespace ProyectoPlanilla.Pages.Planilla
 
         [BindProperty(SupportsGet = true)]
         public string TipoDetalle { get; set; } // "deducciones" o "movimientos"
-
-        public async Task OnGetAsync(int idEmpleado)
+        public async Task OnGetAsync(int? idEmpleado)
         {
-            Console.WriteLine($"PlanillaSemanalModel OnGetAsync called with idEmpleado: {idEmpleado}");
             try
             {
-                Planillas = await _context.GetPlanillasSemanales(idEmpleado, 15);
+                if (idEmpleado == null || idEmpleado == 0)
+                {
+                    idEmpleado = HttpContext.Session.GetInt32("idEmpleado");
+                }
+
+                if (idEmpleado == null || idEmpleado == 0)
+                {
+                    ModelState.AddModelError("", "No se encontró el ID del empleado en sesión ni en la URL.");
+                    return;
+                }
+
+                Console.WriteLine($"PlanillaSemanalModel OnGetAsync called with idEmpleado: {idEmpleado}");
+
+                Planillas = await _context.GetPlanillasSemanales(idEmpleado.Value, 15);
 
                 if (IdPlanillaSeleccionada.HasValue)
                 {
@@ -53,5 +64,6 @@ namespace ProyectoPlanilla.Pages.Planilla
                 DetalleMovimientos = new List<Models.DetalleMovimiento>();
             }
         }
+
     }
 }
