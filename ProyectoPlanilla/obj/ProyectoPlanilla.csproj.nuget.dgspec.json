@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\XPC\\Documents\\ProgrammingProjects\\TEC\\Bases1\\ProyectoPlanilla\\ProyectoPlanillaBD1\\ProyectoPlanilla\\ProyectoPlanilla.csproj": {}
+    "C:\\Users\\josei\\OneDrive\\Documents\\GitHub\\ProyectoPlanillaBD1\\ProyectoPlanilla\\ProyectoPlanilla.csproj": {}
   },
   "projects": {
-    "C:\\Users\\XPC\\Documents\\ProgrammingProjects\\TEC\\Bases1\\ProyectoPlanilla\\ProyectoPlanillaBD1\\ProyectoPlanilla\\ProyectoPlanilla.csproj": {
+    "C:\\Users\\josei\\OneDrive\\Documents\\GitHub\\ProyectoPlanillaBD1\\ProyectoPlanilla\\ProyectoPlanilla.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\XPC\\Documents\\ProgrammingProjects\\TEC\\Bases1\\ProyectoPlanilla\\ProyectoPlanillaBD1\\ProyectoPlanilla\\ProyectoPlanilla.csproj",
+        "projectUniqueName": "C:\\Users\\josei\\OneDrive\\Documents\\GitHub\\ProyectoPlanillaBD1\\ProyectoPlanilla\\ProyectoPlanilla.csproj",
         "projectName": "ProyectoPlanilla",
-        "projectPath": "C:\\Users\\XPC\\Documents\\ProgrammingProjects\\TEC\\Bases1\\ProyectoPlanilla\\ProyectoPlanillaBD1\\ProyectoPlanilla\\ProyectoPlanilla.csproj",
-        "packagesPath": "C:\\Users\\XPC\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\XPC\\Documents\\ProgrammingProjects\\TEC\\Bases1\\ProyectoPlanilla\\ProyectoPlanillaBD1\\ProyectoPlanilla\\obj\\",
+        "projectPath": "C:\\Users\\josei\\OneDrive\\Documents\\GitHub\\ProyectoPlanillaBD1\\ProyectoPlanilla\\ProyectoPlanilla.csproj",
+        "packagesPath": "C:\\Users\\josei\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\josei\\OneDrive\\Documents\\GitHub\\ProyectoPlanillaBD1\\ProyectoPlanilla\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\XPC\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\josei\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"

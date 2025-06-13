@@ -1,4 +1,28 @@
 ﻿@page
-@model MyApp.Namespace.loginModel
+@model ProyectoPlanilla.Pages.login.loginModel
 @{
+    ViewData["Title"] = "Iniciar Sesión";
 }
+
+<h2>Iniciar Sesión</h2>
+
+<form method="post">
+    <div class="form-group">
+        <label asp-for="Login.Username">Usuario</label>
+        <input asp-for="Login.Username" class="form-control" />
+        <span asp-validation-for="Login.Username" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Login.Password">Contraseña</label>
+        <input asp-for="Login.Password" type="password" class="form-control" />
+        <span asp-validation-for="Login.Password" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Entrar</button>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger mt-2">@Model.ErrorMessage</div>
+    }
+</form>

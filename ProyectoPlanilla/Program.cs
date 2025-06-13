@@ -14,6 +14,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddSession();
 
 var app = builder.Build();
 
@@ -34,5 +35,9 @@ app.UseAuthorization();
 app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();
+
+app.UseRouting();             
+app.UseSession();             
+app.UseAuthorization(); 
 
 app.Run();
