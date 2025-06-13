@@ -2,3 +2,4 @@
 /ProyectoPlanilla/bin
 **/obj/
 **/bin/
+*.dll

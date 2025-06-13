@@ -41,7 +41,11 @@
             {
                 <tr>
                     <td>@p.FechaInicio.ToShortDateString() - @p.FechaFin.ToShortDateString()</td>
-                    <td>@p.SalarioBruto</td>
+                    <td>
+                        <a asp-page="./PlanillaSemanal" asp-route-idEmpleado="@idEmpleado" asp-route-IdPlanillaSeleccionada="@p.Id" asp-route-TipoDetalle="movimientos">
+                             @p.SalarioBruto
+                        </a>
+                    </td>
                     <td>
                         <a asp-page="./PlanillaSemanal" asp-route-idEmpleado="@idEmpleado" asp-route-IdPlanillaSeleccionada="@p.Id" asp-route-TipoDetalle="deducciones">
                             @p.TotalDeducciones
@@ -49,13 +53,8 @@
                     </td>
                     <td>@p.SalarioNeto</td>
                     <td>@p.HorasOrdinarias</td>
-                    <td>
-                        <a asp-page="./PlanillaSemanal" asp-route-idEmpleado="@idEmpleado" asp-route-IdPlanillaSeleccionada="@p.Id" asp-route-TipoDetalle="movimientos">
-                            @p.HorasExtrasNormales
-                        </a>
-                    </td>
+                    <td>@p.HorasExtrasNormales</td>
                     <td>@p.HorasExtrasDobles</td>
-                    <td></td>
                 </tr>
             }
         </tbody>
