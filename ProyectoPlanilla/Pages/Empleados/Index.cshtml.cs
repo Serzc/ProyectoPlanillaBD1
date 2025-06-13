@@ -86,5 +86,13 @@ namespace ProyectoPlanilla.Pages.Empleados
             await OnGetAsync();
             return Page();
         }
+        public IActionResult OnPostImpersonar(int idEmpleado)
+        {
+            HttpContext.Session.SetInt32("idEmpleado", idEmpleado);
+            HttpContext.Session.SetInt32("tipoUsuario", 1); // Se comporta como empleado
+
+            return RedirectToPage("/Planilla/PlanillaSemanal", new { idEmpleado });
+        }
+
     }
 }

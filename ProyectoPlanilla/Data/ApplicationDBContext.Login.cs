@@ -69,10 +69,16 @@ namespace ProyectoPlanilla.Data
                     command.Parameters.Add(new SqlParameter("@inIdUsuario", SqlDbType.Int) { Value = idUsuario });
                     command.Parameters.Add(new SqlParameter("@inIP", SqlDbType.VarChar) { Value = ip });
 
+                    var outResultado = new SqlParameter("@outResultado", SqlDbType.Int)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+                    command.Parameters.Add(outResultado);
+
                     await Database.OpenConnectionAsync();
                     await command.ExecuteNonQueryAsync();
 
-                    return 0;
+                    return (int)(outResultado.Value ?? -1);
                 }
             }
             catch (Exception e)
@@ -81,5 +87,6 @@ namespace ProyectoPlanilla.Data
                 return 50000;
             }
         }
+
     }
 }

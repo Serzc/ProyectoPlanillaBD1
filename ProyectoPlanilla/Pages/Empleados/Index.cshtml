@@ -63,7 +63,9 @@
             <td>@empleado.Puesto</td>
             <td>
                 <a asp-page="./Editar" asp-route-id="@empleado.id" class="btn btn-primary btn-sm">Editar</a>
-                <a asp-page="../Planilla/PlanillaSemanal" asp-route-idEmpleado="@empleado.id" class="btn btn-info">Impersonar</a>
+                <form method="post" asp-page-handler="Impersonar" asp-route-idEmpleado="@empleado.id" class="d-inline">
+                    <button type="submit" class="btn btn-info">Impersonar</button>
+                </form>
             </td>
         </tr>
     }
