@@ -50,7 +50,7 @@ BEGIN
             @inIdTipoDocumento,
             @inValorTipoDocumento,
             NULL, -- FechaNacimiento no proporcionada en XML
-            GETDATE(), -- Fecha de contratación actual
+            @inFecha, 
             @idPuesto,
             @inIdDepartamento,
             1 -- Activo

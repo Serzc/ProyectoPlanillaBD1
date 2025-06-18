@@ -6,7 +6,7 @@ BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
         BEGIN TRANSACTION;
-
+        DECLARE @fechaInicio DATE = '2023-06-01';
         DECLARE @xmlData XML = @inXmlData;
 
         -- 1. Cargar Tipos de Documento de Identidad
@@ -128,7 +128,7 @@ BEGIN
                 THEN CAST(emp.value('@FechaNacimiento', 'VARCHAR(10)') AS DATE)
                 ELSE NULL
             END,
-            GETDATE(),
+            @fechaInicio,
             emp.value('@IdDepartamento', 'INT'),
             emp.value('@NombrePuesto', 'VARCHAR(100)'),
             CASE WHEN emp.value('@Activo', 'VARCHAR(1)') = '1' THEN 1 ELSE 0 END

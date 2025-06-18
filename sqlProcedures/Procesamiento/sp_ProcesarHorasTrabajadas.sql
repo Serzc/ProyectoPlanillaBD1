@@ -24,7 +24,7 @@ BEGIN
         FROM dbo.JornadaEmpleado AS JE
         JOIN dbo.TipoJornada AS TJ ON JE.idTipoJornada = TJ.id
         WHERE JE.idEmpleado = @inIdEmpleado
-          AND @inFecha BETWEEN JE.FechaInicio AND JE.FechaFin;
+          AND @inHoraEntrada BETWEEN JE.FechaInicio AND JE.FechaFin;
         
         -- 2. Obtener salario por hora
         SELECT @salarioXHora = P.SalarioXHora
@@ -226,6 +226,26 @@ BEGIN
         SET Procesado = 1
         WHERE id = @inIdAsistencia;
         
+        IF @horasOrdinarias >= 10 OR @horasExtrasNormales >= 10 OR @horasExtrasDobles >= 10 --revisar casos sospechosos
+        BEGIN
+            DECLARE @mensaje VARCHAR(500) = CONCAT('Atención: El empleado ', @inIdEmpleado, '. Fecha: ', @inFecha,'\n',
+                'Horas ordinarias: ', @horasOrdinarias, ', Horas extras normales: ', @horasExtrasNormales, ', Horas extras dobles: ', @horasExtrasDobles
+                , '\n. Hora Entrada: ', @inHoraEntrada, ', Hora Salida: ', @inHoraSalida
+                , '\n. TipoJornada: ',  @idTipoJornada, ', Hora Inicio: ', @horaInicioJornada, ', Hora Fin: ', @horaFinJornada);
+            INSERT INTO dbo.DBError (
+                idTipoError,
+                Mensaje,
+                Procedimiento,
+                Linea
+            )
+            VALUES (
+                50022, -- Código de error personalizado para horas sospechosas
+                @mensaje,
+                'sp_ProcesarHorasTrabajadas',
+                0
+            );
+        END
+
         COMMIT TRANSACTION;
         SET @outResultado = 0;
     END TRY

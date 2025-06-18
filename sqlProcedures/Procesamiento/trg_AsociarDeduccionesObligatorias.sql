@@ -19,7 +19,7 @@ BEGIN
             TD.id,
             CASE WHEN TD.Porcentual = 1 THEN TD.Valor ELSE NULL END,
             CASE WHEN TD.Porcentual = 0 THEN TD.Valor ELSE NULL END,
-            GETDATE()
+            I.FechaContratacion
         FROM inserted i
         CROSS JOIN TipoDeduccion AS TD
         WHERE TD.Obligatorio = 1;

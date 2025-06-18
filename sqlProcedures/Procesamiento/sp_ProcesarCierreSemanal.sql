@@ -62,17 +62,30 @@ BEGIN
             PSE.id,
             ED.idTipoDeduccion,
             CASE 
-                WHEN TD.Porcentual = 1 THEN PSE.SalarioBruto * ED.ValorPorcentual
-                WHEN TD.Porcentual = 0 THEN ED.ValorFijo / @semanasEnMes
+                WHEN TD.Porcentual = 1 THEN PSE.SalarioBruto * TD.Valor
+                WHEN TD.Porcentual = 0 THEN GREATEST(ED.ValorFijo / @semanasEnMes,0)
                 ELSE 0
             END AS Monto
-        FROM dbo.PlanillaSemXEmpleado AS PSE
-        JOIN dbo.EmpleadoDeduccion AS ED ON PSE.idEmpleado = ED.idEmpleado
+        FROM dbo.EmpleadoDeduccion AS ED 
+        FULL JOIN dbo.PlanillaSemXEmpleado AS PSE ON PSE.idEmpleado = ED.idEmpleado        
         JOIN dbo.TipoDeduccion AS TD ON ED.idTipoDeduccion = TD.id
         WHERE PSE.idSemanaPlanilla = @idSemanaPlanilla
           AND ED.FechaDesasociacion IS NULL
           AND (@inFecha >= ED.FechaAsociacion OR ED.FechaAsociacion IS NULL);
         
+        -- Asegúrese de que la tabla deduccionesProcesarBackup exista con las columnas correctas antes de ejecutar este procedimiento.
+        INSERT INTO dbo.deduccionesProcesarBackup (
+            idPlanillaSemXEmpleado,
+            idTipoDeduccion,
+            Monto,
+            Fecha
+        )
+        SELECT
+            DP.idPlanillaSemXEmpleado,
+            DP.idTipoDeduccion,
+            DP.Monto,
+            @inFecha
+        FROM @deduccionesProcesar AS DP;
         -- Actualizar planillas semanales con total deducciones
         UPDATE PSE
         SET 
@@ -133,8 +146,13 @@ BEGIN
         WHEN MATCHED THEN
             UPDATE SET target.Monto = target.Monto + source.Monto
         WHEN NOT MATCHED THEN
-            INSERT (idPlanillaMexXEmpleado, idTipoDeduccion, Monto)
-            VALUES (source.idPlanillaMexXEmpleado, source.idTipoDeduccion, source.Monto);
+            INSERT (
+                idPlanillaMexXEmpleado
+                , idTipoDeduccion
+                , Monto)
+            VALUES (source.idPlanillaMexXEmpleado
+            , source.idTipoDeduccion
+            , source.Monto);
         
         -- Marcar semana como cerrada
         UPDATE dbo.SemanaPlanilla

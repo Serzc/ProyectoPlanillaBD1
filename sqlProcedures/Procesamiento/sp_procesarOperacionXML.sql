@@ -74,7 +74,7 @@ BEGIN
             -- Procesar cierres semanales/mensuales si es jueves
             IF @resultadoParcial = 0 AND @esJueves = 1
             BEGIN
-                IF @i <> 1 OR CAST(@fechaActual AS DATE) <> '2023-06-01'
+                IF @i <> 1 
                 BEGIN 
                     EXEC sp_ProcesarCierreSemanal @fechaActual, @outResultado = @resultadoParcial OUTPUT;
                     IF @resultadoParcial <> 0
