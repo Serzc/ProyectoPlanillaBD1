@@ -1,4 +1,11 @@
-CREATE OR ALTER PROCEDURE sp_ProcesarHorasTrabajadas
+USE [proyectoBD1]
+GO
+/****** Object:  StoredProcedure [dbo].[sp_ProcesarHorasTrabajadas]    Script Date: 6/18/2025 10:37:52 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER   PROCEDURE [dbo].[sp_ProcesarHorasTrabajadas]
     @inIdEmpleado INT,
     @inIdPlanillaSemXEmpleado INT,
     @inIdAsistencia INT,
@@ -37,10 +44,10 @@ BEGIN
         SET @esDomingo = CASE WHEN DATEPART(WEEKDAY, @inFecha) = 1 THEN 1 ELSE 0 END;
         
         -- 4. Calcular horas trabajadas
-        DECLARE @horaEntradaTime DECIMAL(25,5) = DATEPART(HOUR, @inHoraEntrada) + DATEPART(MINUTE, @inHoraEntrada)/60.0;
-        DECLARE @horaSalidaTime DECIMAL(25,5) = DATEPART(HOUR, @inHoraSalida)+ DATEPART(MINUTE, @inHoraSalida)/60.0;
-        DECLARE @horaFinJornadaTime DECIMAL(25,5) = DATEPART(HOUR, @horaFinJornada) + DATEPART(MINUTE, @horaFinJornada)/60.0;
-		DECLARE @horaInicioJornadaTime DECIMAL(25,5) = DATEPART(HOUR, @horaInicioJornada) + DATEPART(MINUTE, @horaInicioJornada)/60.0;
+        DECLARE @horaEntradaTime DECIMAL(25,5) = DATEPART(HOUR, @inHoraEntrada) + DATEPART(MINUTE, @inHoraEntrada)/60;
+        DECLARE @horaSalidaTime DECIMAL(25,5) = DATEPART(HOUR, @inHoraSalida)+ DATEPART(MINUTE, @inHoraSalida)/60;
+        DECLARE @horaFinJornadaTime DECIMAL(25,5) = DATEPART(HOUR, @horaFinJornada) + DATEPART(MINUTE, @horaFinJornada)/60;
+		DECLARE @horaInicioJornadaTime DECIMAL(25,5) = DATEPART(HOUR, @horaInicioJornada) + DATEPART(MINUTE, @horaInicioJornada)/60;
 
         -- Ajustar para jornadas nocturnas que cruzan medianoche
         IF @horaFinJornadaTime < @horaInicioJornadaTime
@@ -56,14 +63,14 @@ BEGIN
         DECLARE @horasExtrasDobles DECIMAL(5,2) = 0;
 
         -- Horas trabajadas totales (redondear hacia abajo a horas completas)
-        DECLARE @horasTrabajadas DECIMAL(5,2) = FLOOR((DATEDIFF(MINUTE,@inHoraEntrada, @inHoraSalida)/60.0));
+        DECLARE @horasTrabajadas DECIMAL(5,2) = FLOOR( @horaSalidaTime-@horaEntradaTime );
 		
 
         -- Horas ordinarias son las trabajadas dentro del horario de jornada (hasta 8 horas)
         SET @horasOrdinarias = CASE 
-            WHEN @horasTrabajadas <= 8 THEN @horasTrabajadas --trabajó menos de 8 horas
-            WHEN @horasTrabajadas > 8 AND @horaSalidaTime <= @horaFinJornadaTime THEN 8 --llegó temprano
-            ELSE FLOOR(@horaFinJornadaTime-@horaEntradaTime) --llegó tarde
+            WHEN @horasTrabajadas <= 8 THEN @horasTrabajadas
+            WHEN @horasTrabajadas > 8 AND @horaSalidaTime <= @horaFinJornadaTime THEN 8
+            ELSE FLOOR(DATEDIFF(MINUTE, @horaEntradaTime, @horaFinJornadaTime) / 60.0)
         END;
 
         -- Asegurar que no exceda las horas trabajadas
@@ -73,17 +80,22 @@ BEGIN
         -- 4.2. Calcular horas extras (si las hay)
         DECLARE @horasExtras DECIMAL(5,2) = @horasTrabajadas - @horasOrdinarias;
 
-        IF @horasTrabajadas > 0
+        IF @horasExtras > 0
         BEGIN
+            -- Verificar si el día siguiente es feriado (para jornadas nocturnas)
+            DECLARE @diaSiguienteFeriado BIT = 0;
+            DECLARE @fechaDiaSiguiente DATE = DATEADD(DAY, 1, @inFecha);
             
-            DECLARE @fechaDiaSiguiente DATE = DATEADD(DAY, 1, @inHoraEntrada);
+            SET @diaSiguienteFeriado = CASE 
+                WHEN EXISTS (SELECT 1 FROM Feriado WHERE Fecha = @fechaDiaSiguiente) THEN 1 
+                ELSE 0 
+            END;
             
             -- Separar horas extras normales y dobles
-            IF @esFeriado = 1 OR @esDomingo = 1 
+            IF @esFeriado = 1 OR @esDomingo = 1 OR @diaSiguienteFeriado = 1
             BEGIN
-                -- Todas las horas son dobles si es feriado/domingo
-                SET @horasExtrasDobles = @horasTrabajadas;
-                SET @horasOrdinarias = 0;
+                -- Todas las horas extras son dobles si es feriado/domingo o el día siguiente es feriado
+                SET @horasExtrasDobles = @horasExtras;
             END
             ELSE
             BEGIN
@@ -91,17 +103,22 @@ BEGIN
                 SET @horasExtrasNormales = @horasExtras;
                 
                 -- Si la jornada cruza medianoche y el día siguiente es feriado/domingo, parte puede ser doble
-                IF @horaSalidaTime > 24 
-                    AND (DATEPART(WEEKDAY, @fechaDiaSiguiente) = 1 
-                        OR EXISTS (SELECT 1 FROM dbo.Feriado WHERE Fecha = @fechaDiaSiguiente))
+                IF @horaSalidaTime > 0 AND 
+                (DATEPART(WEEKDAY, @fechaDiaSiguiente) = 1 OR 
+                    EXISTS (SELECT 1 FROM dbo.Feriado WHERE Fecha = @fechaDiaSiguiente))
                 BEGIN
                     -- Calcular horas en el nuevo día (feriado/domingo)
-                    DECLARE @horasNuevoDia DECIMAL(25,5) = @horaSalidaTime - 24;
+                    DECLARE @horasNuevoDia DECIMAL(25,5) = FLOOR(DATEDIFF(MINUTE, CAST('00:00' AS TIME), 
+                                            DATEADD(HOUR, -24, @horaSalidaTime)) / 60.0);
                     
                     SET @horasExtrasDobles = @horasNuevoDia;
                     SET @horasExtrasNormales = @horasExtras - @horasExtrasDobles;
                 END
             END
+            
+            -- Asegurar que solo contamos horas completas
+            SET @horasExtrasNormales = FLOOR(@horasExtrasNormales);
+            SET @horasExtrasDobles = FLOOR(@horasExtrasDobles);
         END
 
         -- Asegurar que las horas ordinarias no excedan el máximo de 8 horas
@@ -110,8 +127,6 @@ BEGIN
 
         -- Asegurar que solo contamos horas completas
         SET @horasOrdinarias = FLOOR(@horasOrdinarias);
-        SET @horasExtrasNormales = FLOOR(@horasExtrasNormales);
-        SET @horasExtrasDobles = FLOOR(@horasExtrasDobles);
         
         -- 5. Insertar movimientos en la planilla
         BEGIN TRANSACTION;
@@ -148,7 +163,7 @@ BEGIN
         END
         
         -- Movimiento por horas extras normales
-        IF @horasExtrasNormales > 0
+        IF @horasExtrasNormales > 0 AND @esFeriado = 0 AND @esDomingo = 0
         BEGIN
             INSERT INTO dbo.MovimientoPlanilla (
                 idPlanillaSemXEmpleado
@@ -177,7 +192,7 @@ BEGIN
         END
         
         -- Movimiento por horas extras dobles (domingo o feriado)
-        IF @horasExtrasDobles > 0
+        IF @horasExtrasDobles > 0 AND (@esFeriado = 1 OR @esDomingo = 1)
         BEGIN
             INSERT INTO dbo.MovimientoPlanilla (
                 idPlanillaSemXEmpleado
@@ -218,7 +233,7 @@ BEGIN
         SET Procesado = 1
         WHERE id = @inIdAsistencia;
         
-        IF @horasOrdinarias >= 12 OR @horasExtrasNormales >= 12 OR @horasExtrasDobles >= 12 --revisar casos sospechosos
+        IF @horasOrdinarias >= 10 OR @horasExtrasNormales >= 10 OR @horasExtrasDobles >= 10 --revisar casos sospechosos
         BEGIN
             DECLARE @mensaje VARCHAR(500) = CONCAT('Atención: El empleado ', @inIdEmpleado, '. Fecha: ', @inFecha,'\n',
                 'Horas ordinarias: ', @horasOrdinarias, ', Horas extras normales: ', @horasExtrasNormales, ', Horas extras dobles: ', @horasExtrasDobles
