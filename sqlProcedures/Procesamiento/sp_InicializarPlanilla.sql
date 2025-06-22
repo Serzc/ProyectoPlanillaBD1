@@ -64,7 +64,7 @@ BEGIN
             ROLLBACK TRANSACTION;
             
         IF @outResultado = 0
-            SET @outResultado = COALESCE(ERROR_NUMBER(), 50020);
+            SET @outResultado = COALESCE(ERROR_NUMBER(), 50008); -- Error en la base de datos
         
         DECLARE @errorDesc VARCHAR(200) = ERROR_MESSAGE();
         DECLARE @errorLine INT = ERROR_LINE();

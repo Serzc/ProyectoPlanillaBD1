@@ -26,7 +26,7 @@ BEGIN
         
         IF @idSemanaPlanilla IS NULL
         BEGIN
-            SET @outResultado = 50015; -- Semana de planilla no encontrada
+            SET @outResultado = 50008; -- Error en la base de datos
             THROW @outResultado, 'Semana de planilla no encontrada', 1;
         END
         
@@ -166,7 +166,7 @@ BEGIN
         IF @@TRANCOUNT > 0
             ROLLBACK TRANSACTION;
         IF @outResultado = 0
-            SET @outResultado = COALESCE(ERROR_NUMBER(), 50016);
+            SET @outResultado = COALESCE(ERROR_NUMBER(), 50008); -- Error en la base de datos
         
         DECLARE @errorDesc VARCHAR(200) = CONCAT('En la fecha: ',@inFecha,' ',ERROR_MESSAGE());
         INSERT INTO dbo.DBError (

@@ -79,7 +79,9 @@ BEGIN
             DECLARE @fechaDiaSiguiente DATE = DATEADD(DAY, 1, @inHoraEntrada);
             
             -- Separar horas extras normales y dobles
-            IF @esFeriado = 1 OR @esDomingo = 1 
+            IF @esFeriado = 1 OR @esDomingo = 1 OR 
+               (@horaSalidaTime > 24 AND (DATEPART(WEEKDAY, @fechaDiaSiguiente) = 1 
+                OR EXISTS (SELECT 1 FROM dbo.Feriado WHERE Fecha = @fechaDiaSiguiente)))
             BEGIN
                 -- Todas las horas son dobles si es feriado/domingo
                 SET @horasExtrasDobles = @horasTrabajadas;
@@ -231,7 +233,7 @@ BEGIN
                 Linea
             )
             VALUES (
-                50022, -- Código de error personalizado para horas sospechosas
+                50008, -- Error en la base de datos
                 @mensaje,
                 'sp_ProcesarHorasTrabajadas',
                 0
@@ -246,7 +248,7 @@ BEGIN
             ROLLBACK TRANSACTION;
             
         IF @outResultado = 0
-            SET @outResultado = COALESCE(ERROR_NUMBER(), 50021);
+            SET @outResultado = COALESCE(ERROR_NUMBER(), 50008); -- Error en la base de datos
         
         DECLARE @errorDesc VARCHAR(200) = CONCAT('En la fecha: ',@inFecha,' ',ERROR_MESSAGE());
         INSERT INTO dbo.DBError (

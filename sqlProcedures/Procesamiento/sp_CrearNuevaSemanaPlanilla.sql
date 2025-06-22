@@ -9,8 +9,8 @@ BEGIN
         -- Verificar que la fecha sea jueves
         IF DATEPART(WEEKDAY, @inFechaJueves) <> 5
         BEGIN
-            SET @outResultado = 50022;
-            THROW 50022, 'La fecha proporcionada no es un jueves', 1;
+            SET @outResultado = 50008; -- Error en la base de datos
+            THROW @outResultado, 'La fecha proporcionada no es un jueves', 1;
         END
         
         DECLARE @fechaInicioSemana DATE = DATEADD(DAY, 1, @inFechaJueves); -- Viernes
@@ -67,8 +67,8 @@ BEGIN
               AND FechaFin = @fechaFinSemana
         )
         BEGIN
-            SET @outResultado = 50025;
-            THROW 50025, 'La semana ya existe', 1;
+            SET @outResultado = 50008; -- Error en la base de datos
+            THROW @outResultado, 'La semana ya existe', 1;
         END
         
         -- Crear nueva semana
@@ -155,7 +155,7 @@ BEGIN
     END TRY
     BEGIN CATCH
         IF @outResultado = 0
-            SET @outResultado = COALESCE(ERROR_NUMBER(), 50023);
+            SET @outResultado = COALESCE(ERROR_NUMBER(), 50008); -- Error en la base de datos); -- error no reconocido
         
         DECLARE @errorDesc VARCHAR(200) = CONCAT('En la fecha: ', @inFechaJueves, ' - ', ERROR_MESSAGE());
         DECLARE @errorLine INT = ERROR_LINE();

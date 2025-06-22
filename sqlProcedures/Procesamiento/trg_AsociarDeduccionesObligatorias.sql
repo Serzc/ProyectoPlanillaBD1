@@ -32,7 +32,7 @@ BEGIN
             Linea
         )
         VALUES (
-            50014,
+            50008, -- Error en la base de datos
             ERROR_MESSAGE(),
             ERROR_PROCEDURE(),
             ERROR_LINE()

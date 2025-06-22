@@ -46,7 +46,7 @@ BEGIN
             
             IF @idEmpleado IS NULL
             BEGIN
-                SET @resultadoParcial = 50011; -- Empleado no encontrado
+                SET @resultadoParcial = 50008; -- Error en la base de datos
                 THROW @resultadoParcial, 'Empleado no encontrado', 1;
             END
             ELSE
@@ -60,7 +60,7 @@ BEGIN
                 
                 IF @esObligatoria = 1
                 BEGIN
-                    SET @resultadoParcial = 50012; -- No se puede desasociar deducción obligatoria
+                    SET @resultadoParcial = 50008; -- Error en la base de datos
                     THROW @resultadoParcial, 'No se puede desasociar deducción obligatoria', 1;
                     END
                 ELSE
@@ -74,7 +74,7 @@ BEGIN
                           AND FechaDesasociacion IS NULL
                     )
                     BEGIN
-                        SET @resultadoParcial = 50013; -- Asociación no encontrada
+                        SET @resultadoParcial = 50008; -- Error en la base de datos
                         THROW @resultadoParcial, 'Asociacion no encontrada', 1;
                         END
                     ELSE
@@ -143,7 +143,7 @@ BEGIN
             ROLLBACK TRANSACTION;
             
         IF @outResultado = 0
-            SET @outResultado = COALESCE(ERROR_NUMBER(), 50014);
+            SET @outResultado = COALESCE(ERROR_NUMBER(),50008); -- Error en la base de datos
         
         DECLARE @errorDesc VARCHAR(200) = CONCAT('En la fecha: ',@inFecha,' ',ERROR_MESSAGE());
         INSERT INTO dbo.DBError (
