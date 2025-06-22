@@ -40,7 +40,7 @@
             @foreach (var p in Model.Planillas)
             {
                 <tr>
-                    <td>@p.FechaInicio.ToShortDateString() - @p.FechaFin.ToShortDateString()</td>
+                    <td>@p.FechaInicio.ToString("dd/MM/yyyy") - @p.FechaFin.ToString("dd/MM/yyyy")</td>
                     <td>
                         <a asp-page="./PlanillaSemanal" asp-route-idEmpleado="@idEmpleado" asp-route-IdPlanillaSeleccionada="@p.Id" asp-route-TipoDetalle="movimientos">
                              @p.SalarioBruto

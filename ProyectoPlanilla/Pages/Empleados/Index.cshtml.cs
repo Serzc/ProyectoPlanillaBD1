@@ -89,7 +89,7 @@ namespace ProyectoPlanilla.Pages.Empleados
         public IActionResult OnPostImpersonar(int idEmpleado)
         {
             HttpContext.Session.SetInt32("idEmpleado", idEmpleado);
-            HttpContext.Session.SetInt32("tipoUsuario", 1); // Se comporta como empleado
+            HttpContext.Session.SetInt32("tipoUsuario", 1); // Se comporta como admin
 
             return RedirectToPage("/Planilla/PlanillaSemanal", new { idEmpleado });
         }

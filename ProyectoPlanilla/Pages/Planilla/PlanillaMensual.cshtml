@@ -36,7 +36,7 @@
             @foreach (var p in Model.Planillas)
             {
                 <tr>
-                    <td>@p.FechaInicio.ToString("MMMM yyyy")</td>
+                    <td>@p.FechaFin.ToString("MMMM yyyy", new System.Globalization.CultureInfo("es-ES"))</td>
                     <td>@p.SalarioBruto</td>
                     <td>
                         <a asp-page="./PlanillaMensual" asp-route-idEmpleado="@idEmpleado" asp-route-IdPlanillaSeleccionada="@p.id">
