@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using ProyectoPlanilla.Models;
 using System.Data;
 using Microsoft.Data.SqlClient;
@@ -168,8 +170,7 @@ namespace ProyectoPlanilla.Data
 
             return resultado;
         }
-
-        public async Task<int> InsertarEmpleado(Empleado empleado)
+        public async Task<int> InsertarEmpleado(Empleado empleado, int idUsuarioOp = 0)
         {
             int resultado = 0;
 
@@ -177,39 +178,26 @@ namespace ProyectoPlanilla.Data
             {
                 using (var command = Database.GetDbConnection().CreateCommand())
                 {
-                    command.CommandText = "sp_insertarEmpleado";
+                    command.CommandText = "sp_InsertarEmpleado";
                     command.CommandType = CommandType.StoredProcedure;
 
-                    var inNombre = new SqlParameter
-                    {
-                        ParameterName = "@inNombre",
-                        SqlDbType = SqlDbType.VarChar,
-                        Direction = ParameterDirection.Input,
-                        Value = empleado.Nombre ?? (object)DBNull.Value
-                    };
-                    var inValorDocumentoIdentidad = new SqlParameter
-                    {
-                        ParameterName = "@inValorDocumentoIdentidad",
-                        SqlDbType = SqlDbType.VarChar,
-                        Direction = ParameterDirection.Input,
-                        Value = empleado.ValorDocumentoIdentidad ?? (object)DBNull.Value
-                    };
-                    // Otros parámetros...
+                    command.Parameters.Add(new SqlParameter("@inNombre", empleado.Nombre ?? (object)DBNull.Value));
+                    command.Parameters.Add(new SqlParameter("@inIdTipoDocumento", empleado.idTipoDocumento));
+                    command.Parameters.Add(new SqlParameter("@inValorTipoDocumento", empleado.ValorDocumentoIdentidad ?? (object)DBNull.Value));
+                    command.Parameters.Add(new SqlParameter("@inIdDepartamento", empleado.idDepartamento));
+                    command.Parameters.Add(new SqlParameter("@inNombrePuesto", empleado.Puesto ?? (object)DBNull.Value));
+                    command.Parameters.Add(new SqlParameter("@inUsuario", empleado.Usuario ?? (object)DBNull.Value));
+                    command.Parameters.Add(new SqlParameter("@inPassword", empleado.Password ?? (object)DBNull.Value));
+                    command.Parameters.Add(new SqlParameter("@inFecha", DateTime.Now));
+                    command.Parameters.Add(new SqlParameter("@inIdUsuarioOp", idUsuarioOp));
 
-                    var outResultado = new SqlParameter
+                    var outResultado = new SqlParameter("@outResultado", SqlDbType.Int)
                     {
-                        ParameterName = "@outResultado",
-                        SqlDbType = SqlDbType.Int,
                         Direction = ParameterDirection.Output
                     };
-
-                    command.Parameters.Add(inNombre);
-                    command.Parameters.Add(inValorDocumentoIdentidad);
-                    // Otros parámetros...
                     command.Parameters.Add(outResultado);
 
                     await Database.OpenConnectionAsync();
-
                     await command.ExecuteNonQueryAsync();
 
                     resultado = outResultado.Value != DBNull.Value ? (int)outResultado.Value : 0;

@@ -13,27 +13,45 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Asignar GETDATE() si @inFecha es NULL
     IF @inFecha IS NULL
         SET @inFecha = GETDATE();
-    
+
     BEGIN TRY
+        -- Validar si ya existe un empleado con el mismo ValorDocumentoIdentidad
+        IF EXISTS (SELECT 1 FROM dbo.Empleado WHERE ValorDocumentoIdentidad = @inValorTipoDocumento)
+        BEGIN
+            SET @outResultado = 50004; -- Empleado con ValorDocumentoIdentidad ya existe
+            THROW @outResultado, 'Empleado con ValorDocumentoIdentidad ya existe en inserción', 1;
+        END
+
+        -- Validar si ya existe un empleado con el mismo nombre
+        IF EXISTS (SELECT 1 FROM dbo.Empleado WHERE Nombre = @inNombre)
+        BEGIN
+            SET @outResultado = 50005; -- Empleado con mismo nombre ya existe
+            THROW @outResultado, 'Empleado con mismo nombre ya existe en inserción', 1;
+        END
+
+        -- Validar si ya existe un usuario con el mismo nombre de usuario
+        IF EXISTS (SELECT 1 FROM dbo.Usuario WHERE Username = @inUsuario)
+        BEGIN
+            SET @outResultado = 50005; -- Usuario con mismo nombre ya existe
+            THROW @outResultado, 'Usuario con mismo nombre ya existe en inserción', 1;
+        END
+
         DECLARE @idPuesto INT;
-        
-        -- Obtener el ID del puesto por nombre
+
         SELECT @idPuesto = id 
         FROM dbo.Puesto 
         WHERE Nombre = @inNombrePuesto;
-        
+
         IF @idPuesto IS NULL
         BEGIN
             SET @outResultado = 50008; -- Error en la base de datos
             THROW @outResultado, 'Puesto no encontrado', 1;
-            
         END
-        
+
         BEGIN TRANSACTION;
-        
+
         -- Insertar empleado
         INSERT INTO dbo.Empleado (
             Nombre, 
@@ -55,9 +73,9 @@ BEGIN
             @inIdDepartamento,
             1 -- Activo
         );
-        
+
         DECLARE @idEmpleado INT = SCOPE_IDENTITY();
-        
+
         -- Crear usuario asociado
         INSERT INTO dbo.Usuario (
             Username,
@@ -74,7 +92,9 @@ BEGIN
 
         DECLARE @idTipoEvento INT;
         SELECT @idTipoEvento = id FROM dbo.TipoEvento WHERE Nombre = 'Insertar empleado';
-
+        
+        IF @inIdUsuarioOp IS NULL
+            SET @inIdUsuarioOp = (SELECT TOP 1 id FROM dbo.Usuario WHERE Tipo = 3); -- Usuario sistema
         INSERT INTO dbo.EventLog (
             FechaHora,
             idUsuario,
@@ -83,7 +103,7 @@ BEGIN
         )
         VALUES (
             @inFecha,
-            (SELECT id FROM dbo.Usuario WHERE Tipo = 3),
+            @inIdUsuarioOp,
             @idTipoEvento,
             JSON_QUERY(CONCAT(
                 '{',
@@ -97,7 +117,7 @@ BEGIN
                 '}'
             ))
         );
-    
+
         COMMIT TRANSACTION;
         SET @outResultado = 0;
     END TRY
@@ -105,8 +125,8 @@ BEGIN
         IF @@TRANCOUNT > 0
             ROLLBACK TRANSACTION;
         IF @outResultado = 0
-            SET @outResultado = COALESCE(ERROR_NUMBER(), 50008); -- Error en la base de datos
-        
+            SET @outResultado = COALESCE(ERROR_NUMBER(), 50008);
+
         DECLARE @errorDesc VARCHAR(200) = CONCAT('En la fecha: ',@inFecha,' ',ERROR_MESSAGE());
         INSERT INTO dbo.DBError (
             idTipoError,
