@@ -18,14 +18,18 @@ namespace ProyectoPlanilla.Data
         public async Task<List<Puesto>> GetPuestos()
         {
             var puestos = new List<Puesto>();
-
+            
             try
             {
                 using (var command = Database.GetDbConnection().CreateCommand())
                 {
                     command.CommandText = "sp_obtenerPuestos";
                     command.CommandType = CommandType.StoredProcedure;
-
+                    var outResultado = new SqlParameter("@outResultado", System.Data.SqlDbType.Int)
+                    {
+                        Direction = System.Data.ParameterDirection.Output
+                    };
+                    command.Parameters.Add(outResultado);
                     await Database.OpenConnectionAsync();
 
                     using (var reader = await command.ExecuteReaderAsync())
@@ -61,7 +65,11 @@ namespace ProyectoPlanilla.Data
                 {
                     command.CommandText = "sp_obtenerDepartamentos";
                     command.CommandType = CommandType.StoredProcedure;
-
+                    var outResultado = new SqlParameter("@outResultado", System.Data.SqlDbType.Int)
+                    {
+                        Direction = System.Data.ParameterDirection.Output
+                    };
+                    command.Parameters.Add(outResultado);
                     await Database.OpenConnectionAsync();
 
                     using (var reader = await command.ExecuteReaderAsync())
@@ -96,7 +104,11 @@ namespace ProyectoPlanilla.Data
                 {
                     command.CommandText = "sp_obtenerTiposDocumentoIdentidad";
                     command.CommandType = CommandType.StoredProcedure;
-
+                    var outResultado = new SqlParameter("@outResultado", System.Data.SqlDbType.Int)
+                    {
+                        Direction = System.Data.ParameterDirection.Output
+                    };
+                    command.Parameters.Add(outResultado);
                     await Database.OpenConnectionAsync();
 
                     using (var reader = await command.ExecuteReaderAsync())
@@ -122,14 +134,18 @@ namespace ProyectoPlanilla.Data
         }
         public async Task<int> EliminarTablasAsync()
         {
-            int resultado = -1;
+            int resultado = 0;
             try
             {
                 using (var command = Database.GetDbConnection().CreateCommand())
                 {
                     command.CommandText = "sp_borrarTablas";
                     command.CommandType = System.Data.CommandType.StoredProcedure;
-
+                    var outResultado = new SqlParameter("@outResultado", System.Data.SqlDbType.Int)
+                    {
+                        Direction = System.Data.ParameterDirection.Output
+                    };
+                    command.Parameters.Add(outResultado);
                     await Database.OpenConnectionAsync();
                     await command.ExecuteNonQueryAsync();
                     resultado = 0;
@@ -138,14 +154,14 @@ namespace ProyectoPlanilla.Data
             catch (Exception e)
             {
                 Console.WriteLine($"Error al eliminar tablas: {e.Message}");
-                resultado = -9999;
+                resultado = 50008;
             }
             return resultado;
         }
 
         public async Task<int> CargarCatalogoDesdeXMLAsync(string xmlCatalogo)
         {
-            int resultado = -1;
+            int resultado = 0;
             try
             {
                 using (var command = Database.GetDbConnection().CreateCommand())
@@ -174,7 +190,7 @@ namespace ProyectoPlanilla.Data
             catch (Exception e)
             {
                 Console.WriteLine($"Error al cargar catálogo desde XML: {e.Message}");
-                resultado = -9999;
+                resultado = 50008;
             }
             return resultado;
         }

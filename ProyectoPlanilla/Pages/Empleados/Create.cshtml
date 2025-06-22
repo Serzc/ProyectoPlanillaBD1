@@ -5,7 +5,17 @@
 <h2>Nuevo Empleado</h2>
 
 <form method="post">
-      
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            <ul>
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            </ul>
+        </div>
+    }
     <div class="form-group">
         <label asp-for="Empleado.Nombre"></label>
         <input asp-for="Empleado.Nombre" class="form-control" />
@@ -13,7 +23,7 @@
     </div>
     
     <div class="form-group">
-        <label asp-for="Empleado.idTipoDocumento"></label>
+        <label asp-for="Empleado.idTipoDocumento">Tipo de Documento</label>
         <select asp-for="Empleado.idTipoDocumento" class="form-control">
             @foreach (var tipo in Model.TiposDocumento)
             {
@@ -23,28 +33,28 @@
     </div>
     
     <div class="form-group">
-        <label asp-for="Empleado.ValorDocumentoIdentidad"></label>
+        <label asp-for="Empleado.ValorDocumentoIdentidad">Documento de Identidad</label>
         <input asp-for="Empleado.ValorDocumentoIdentidad" class="form-control" />
         <span asp-validation-for="Empleado.ValorDocumentoIdentidad" class="text-danger"></span>
     </div>
     
     <div class="form-group">
-        <label asp-for="Empleado.FechaNacimiento"></label>
+        <label asp-for="Empleado.FechaNacimiento"> Fecha de Nacimiento</label>
         <input asp-for="Empleado.FechaNacimiento" type="date" class="form-control" />
     </div>
     
     <div class="form-group">
-        <label asp-for="Empleado.idPuesto"></label>
-        <select asp-for="Empleado.idPuesto" class="form-control">
+        <label asp-for="Empleado.Puesto"> Puesto</label>
+        <select asp-for="Empleado.Puesto" class="form-control">
             @foreach (var puesto in Model.Puestos)
             {
-                <option value="@puesto.id">@puesto.Nombre</option>
+                <option value="@puesto.Nombre">@puesto.Nombre</option>
             }
         </select>
     </div>
     
     <div class="form-group">
-        <label asp-for="Empleado.idDepartamento"></label>
+        <label asp-for="Empleado.idDepartamento">Departamento</label>
         <select asp-for="Empleado.idDepartamento" class="form-control">
             @foreach (var depto in Model.Departamentos)
             {
@@ -52,7 +62,23 @@
             }
         </select>
     </div>
+    <div class="form-group" style="margin-bottom: 40px;"></div>
+
+    <div class="form-group">
+        <label asp-for="Empleado.Usuario">Nombre de Usuario</label>
+        <input asp-for="Empleado.Usuario" class="form-control" />
+        <span asp-validation-for="Empleado.Usuario" class="text-danger"></span>
+    </div>
+
     
+    <div class="form-group">
+        <label asp-for="Empleado.Password">Constraseña de Usuario</label>
+        <input asp-for="Empleado.Password" class="form-control" />
+        <span asp-validation-for="Empleado.Password" class="text-danger"></span>
+    </div>
+    <div class="form-group" style="margin-bottom: 20px;"></div>
+    
+
     <button type="submit" class="btn btn-primary">Guardar</button>
     <a asp-page="./Index" class="btn btn-secondary">Cancelar</a>
 </form>

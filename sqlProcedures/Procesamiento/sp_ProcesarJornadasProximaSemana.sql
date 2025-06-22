@@ -83,7 +83,7 @@ BEGIN
             ROLLBACK TRANSACTION;
             
         IF @outResultado = 0
-            SET @outResultado = COALESCE(ERROR_NUMBER(), 50001);
+            SET @outResultado = COALESCE(ERROR_NUMBER(), 50008); -- Error en la base de datos
         
         DECLARE @errorDesc VARCHAR(200) = CONCAT('En la fecha: ',@inFecha,' ',ERROR_MESSAGE());
         INSERT INTO dbo.DBError (

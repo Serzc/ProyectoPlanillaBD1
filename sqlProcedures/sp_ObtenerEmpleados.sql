@@ -31,6 +31,6 @@ BEGIN
             
     END TRY
     BEGIN CATCH
-        SET @outResultado = 50000 + ERROR_NUMBER();
+        SET @outResultado = 50008; -- Error en la base de datos
     END CATCH
 END

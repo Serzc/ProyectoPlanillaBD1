@@ -49,7 +49,7 @@ BEGIN
             
             IF @idEmpleado IS NULL
             BEGIN
-                SET @resultadoParcial = 50008; -- Empleado no encontrado
+                SET @resultadoParcial = 50008; -- Error en la base de datos
                 THROW @resultadoParcial, 'Empleado no encontrado', 1;
             END
             ELSE
@@ -63,7 +63,7 @@ BEGIN
                 
                 IF @esObligatoria = 1
                 BEGIN
-                    SET @resultadoParcial = 50009; -- No se puede asociar deducción obligatoria manualmente
+                    SET @resultadoParcial = 50008; -- Error en la base de datos
                     THROW @resultadoParcial, 'Intento de asociar deducción obligatoria manualmente', 1;
                     
                 END
@@ -132,7 +132,7 @@ BEGIN
                               AND FechaDesasociacion IS NULL) = 0
                     )
                     BEGIN
-                        SET @resultadoParcial = 50030; 
+                        SET @resultadoParcial = 50008; -- Error en la base de datos 
                         DECLARE @errMsg NVARCHAR(200);
                         SET @errMsg = 'Asociado Empleado con porcentaje 0: ' + CAST(@idEmpleado AS NVARCHAR) + ' con tipo deducción ' + CAST(@idTipoDeduccion AS NVARCHAR);
                         THROW @resultadoParcial, @errMsg, 1;
@@ -197,7 +197,7 @@ BEGIN
         IF @@TRANCOUNT > 0
             ROLLBACK TRANSACTION;
         IF @outResultado = 0
-            SET @outResultado = COALESCE(ERROR_NUMBER(), 50010);
+            SET @outResultado = COALESCE(ERROR_NUMBER(), 50008); -- Error en la base de datos
         
         DECLARE @errorDesc VARCHAR(200) = CONCAT('En la fecha: ',@inFecha,' ',ERROR_MESSAGE());
         INSERT INTO dbo.DBError (

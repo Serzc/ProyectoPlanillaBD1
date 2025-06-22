@@ -49,7 +49,7 @@ BEGIN
             
             IF @idEmpleado IS NULL
             BEGIN
-                SET @resultadoParcial = 50002; -- Empleado no encontrado
+                SET @resultadoParcial = 50008; -- Error en la base de datos
                 THROW @resultadoParcial, 'Empleado no encontrado', 1;
                 END
             ELSE
@@ -63,7 +63,7 @@ BEGIN
                 
                 IF @idSemanaPlanilla IS NULL
                 BEGIN
-                    SET @resultadoParcial = 50003; -- Semana de planilla no encontrada
+                    SET @resultadoParcial = 50008; -- Error en la base de datos
                     THROW @resultadoParcial, 'Semana planilla no encontrada', 1;
                     END
                 ELSE
@@ -165,7 +165,7 @@ BEGIN
             ROLLBACK TRANSACTION;
             
         IF @outResultado = 0
-            SET @outResultado = COALESCE(ERROR_NUMBER(), 50004);
+            SET @outResultado = COALESCE(ERROR_NUMBER(), 50008); -- Error en la base de datos
         
         DECLARE @errorDesc VARCHAR(200) = CONCAT('En la fecha: ',@inFecha,' ',ERROR_MESSAGE());
         INSERT INTO dbo.DBError (
