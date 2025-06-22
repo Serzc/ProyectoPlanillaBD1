@@ -28,7 +28,11 @@ namespace ProyectoPlanilla.Pages.Empleados
 
         public async Task OnGetAsync()
         {
-            var (empleados, resultado) = await _context.ObtenerEmpleadosActivos(Filtro.Replace("-", ""));
+            // Si el filtro es vacío o solo contiene guiones, no aplicar filtro
+            string filtroLimpio = (Filtro ?? "").Replace("-", "").Trim();
+            string filtroFinal = string.IsNullOrEmpty(filtroLimpio) ? null : Filtro;
+
+            var (empleados, resultado) = await _context.ObtenerEmpleadosActivos(filtroFinal);
 
             if (resultado == 0)
             {

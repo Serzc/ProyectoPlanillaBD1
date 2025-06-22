@@ -3,71 +3,93 @@
 
 <h2>Empleados</h2>
 
-<a asp-page="./Create" class="btn btn-success">Nuevo Empleado</a>
-<form method="get">
-    <input type="text" name="Filtro" value="@Model.Filtro" placeholder="Buscar por nombre o documento..." />
-    <button type="submit">Buscar</button>
-</form>
+<div class="row">
+    <!-- Columna principal: tabla y búsqueda -->
+    <div class="col-md-8">
+        <form method="get" class="mb-3">
+            <input type="text" name="Filtro" value="@Model.Filtro" placeholder="Buscar por nombre o documento..." />
+            <button type="submit" class="btn btn-outline-primary">Buscar</button>
+        </form>
 
-@if (!string.IsNullOrEmpty(Model.MensajeError))
-{
-    <div class="alert alert-danger">@Model.MensajeError</div>
+        @if (!string.IsNullOrEmpty(Model.MensajeError))
+        {
+            <div class="alert alert-danger">@Model.MensajeError</div>
+        }
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Documento</th>
+                    <th>Puesto</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var empleado in Model.Empleados)
+            {
+                <tr>
+                    <td>@empleado.Nombre</td>
+                    <td>@empleado.ValorDocumentoIdentidad</td>
+                    <td>@empleado.Puesto</td>
+                    <td>
+                        <a asp-page="./Editar" asp-route-id="@empleado.id" class="btn btn-primary btn-sm">Editar</a>
+                        <form method="post" asp-page-handler="Impersonar" asp-route-idEmpleado="@empleado.id" class="d-inline">
+                            <button type="submit" class="btn btn-info">Impersonar</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Columna lateral derecha: nuevo empleado y utilidades -->
+    <div class="col-md-4">
+        <a asp-page="./Create" class="btn btn-success mb-3 w-100">Nuevo Empleado</a>
+
+        <!-- Botón para mostrar/ocultar utilidades -->
+        <button type="button" class="btn btn-warning mb-3 w-100" onclick="toggleUtilidades()">Mostrar/Ocultar Utilidades Avanzadas</button>
+
+        <div id="utilidadesAvanzadas" style="display:none;">
+            <!-- Botón para eliminar todas las tablas -->
+            <form method="post" asp-page-handler="EliminarTablas">
+                <button type="submit" class="btn btn-danger mt-2">Eliminar todas las tablas</button>
+            </form>
+            <!-- Campo y botón para cargar catálogo desde XML -->
+            <form method="post" asp-page-handler="CargarCatalogo">
+                <label for="XmlCatalogo">Pega el XML del catálogo:</label>
+                <textarea id="XmlCatalogo" name="XmlCatalogo" rows="6" class="form-control">@Model.XmlCatalogo</textarea>
+                <button type="submit" class="btn btn-primary mt-2">Cargar Catálogo</button>
+            </form>
+            <!-- Campo y botón para cargar operación desde XML -->
+            <form method="post">
+                <label for="XmlOperacion">Pega el XML de operación:</label>
+                <textarea id="XmlOperacion" name="XmlOperacion" rows="6" class="form-control">@Model.XmlOperacion</textarea>
+                <button type="submit" asp-page-handler="ProcesarPlanilla" class="btn btn-warning mt-2">Procesar Planilla</button>
+            </form>
+
+            @if (!string.IsNullOrEmpty(Model.MensajeProceso))
+            {
+                <div class="alert alert-info">@Model.MensajeProceso</div>
+            }
+            @if (!string.IsNullOrEmpty(Model.MensajeCatalogo))
+            {
+                <div class="alert alert-info">@Model.MensajeCatalogo</div>
+            }
+            @if (!string.IsNullOrEmpty(Model.MensajeEliminacion))
+            {
+                <div class="alert alert-warning">@Model.MensajeEliminacion</div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleUtilidades() {
+            var div = document.getElementById('utilidadesAvanzadas');
+            div.style.display = div.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
 }
-<!-- Campo y botón para cargar operación desde XML -->
-<form method="post">
-    <label for="XmlOperacion">Pega el XML de operación:</label>
-    <textarea id="XmlOperacion" name="XmlOperacion" rows="6" class="form-control">@Model.XmlOperacion</textarea>
-    <button type="submit" asp-page-handler="ProcesarPlanilla" class="btn btn-warning mt-2">Procesar Planilla</button>
-</form>
-
-@if (!string.IsNullOrEmpty(Model.MensajeProceso))
-{
-    <div class="alert alert-info">@Model.MensajeProceso</div>
-}
-<!-- Botón para eliminar todas las tablas -->
-<form method="post" asp-page-handler="EliminarTablas">
-    <button type="submit" class="btn btn-danger mt-2">Eliminar todas las tablas</button>
-</form>
-
-<!-- Campo y botón para cargar catálogo desde XML -->
-<form method="post" asp-page-handler="CargarCatalogo">
-    <label for="XmlCatalogo">Pega el XML del catálogo:</label>
-    <textarea id="XmlCatalogo" name="XmlCatalogo" rows="6" class="form-control">@Model.XmlCatalogo</textarea>
-    <button type="submit" class="btn btn-primary mt-2">Cargar Catálogo</button>
-</form>
-
-@if (!string.IsNullOrEmpty(Model.MensajeCatalogo))
-{
-    <div class="alert alert-info">@Model.MensajeCatalogo</div>
-}
-@if (!string.IsNullOrEmpty(Model.MensajeEliminacion))
-{
-    <div class="alert alert-warning">@Model.MensajeEliminacion</div>
-}
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>Nombre</th>
-            <th>Documento</th>
-            <th>Puesto</th>
-           
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var empleado in Model.Empleados)
-    {
-        <tr>
-            <td>@empleado.Nombre</td>
-            <td>@empleado.ValorDocumentoIdentidad</td>
-            <td>@empleado.Puesto</td>
-            <td>
-                <a asp-page="./Editar" asp-route-id="@empleado.id" class="btn btn-primary btn-sm">Editar</a>
-                <form method="post" asp-page-handler="Impersonar" asp-route-idEmpleado="@empleado.id" class="d-inline">
-                    <button type="submit" class="btn btn-info">Impersonar</button>
-                </form>
-            </td>
-        </tr>
-    }
-    </tbody>
-</table>

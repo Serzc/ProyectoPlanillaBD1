@@ -7,6 +7,7 @@ CREATE OR ALTER PROCEDURE sp_InsertarEmpleado
     @inUsuario VARCHAR(50),
     @inPassword VARCHAR(100),
     @inFecha DATE,
+    @inFechaNacimiento DATE = NULL,
     @inIdUsuarioOp INT,
     @outResultado INT OUTPUT
 AS
@@ -67,7 +68,7 @@ BEGIN
             @inNombre,
             @inIdTipoDocumento,
             @inValorTipoDocumento,
-            NULL, -- FechaNacimiento no proporcionada en XML
+            @inFechaNacimiento, 
             @inFecha, 
             @idPuesto,
             @inIdDepartamento,

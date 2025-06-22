@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.InteropServices;
 
 namespace ProyectoPlanilla.Models
 {
@@ -19,6 +20,7 @@ namespace ProyectoPlanilla.Models
 
         public bool Activo { get; set; } = true;
         public int idDepartamento { get; set; }
+        public string Departamento { get; set; }
         public string FechaContratacion { get; set; } = DateTime.Now.ToString("yyyy-MM-dd");
         public string Usuario { get; set; }
         public string Password { get; set; }
