@@ -64,6 +64,7 @@ BEGIN
                 @usuario, 
                 @password,
                 @inFecha,
+                NULL, -- no hay fecha de nacimiento en xml
                 @usuarioSistemaId, 
                 @outResultado = @resultadoParcial OUTPUT;
                 

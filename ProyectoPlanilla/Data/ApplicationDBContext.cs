@@ -141,11 +141,6 @@ namespace ProyectoPlanilla.Data
                 {
                     command.CommandText = "sp_borrarTablas";
                     command.CommandType = System.Data.CommandType.StoredProcedure;
-                    var outResultado = new SqlParameter("@outResultado", System.Data.SqlDbType.Int)
-                    {
-                        Direction = System.Data.ParameterDirection.Output
-                    };
-                    command.Parameters.Add(outResultado);
                     await Database.OpenConnectionAsync();
                     await command.ExecuteNonQueryAsync();
                     resultado = 0;

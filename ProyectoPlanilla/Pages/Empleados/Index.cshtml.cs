@@ -32,7 +32,7 @@ namespace ProyectoPlanilla.Pages.Empleados
             string filtroLimpio = (Filtro ?? "").Replace("-", "").Trim();
             string filtroFinal = string.IsNullOrEmpty(filtroLimpio) ? null : Filtro;
 
-            var (empleados, resultado) = await _context.ObtenerEmpleadosActivos(filtroFinal);
+            var (empleados, resultado) = await _context.ObtenerEmpleadosActivos(filtroLimpio);
 
             if (resultado == 0)
             {
